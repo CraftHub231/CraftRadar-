@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftRadar</title>
+<script src="https://tapi.bale.ai/miniapp.js?3"></script>
+<style>
+  :root {
+    --bg: #0f1720;
+    --card: #1b2733;
+    --accent: #4ade80;
+    --accent2: #f97316;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 12px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    margin: 8px 0 16px;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: var(--card);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border: 2px solid transparent;
+  }
+  .tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  .badge {
+    font-size: 11px;
+    background: var(--accent2);
+    color: #111;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .ip {
+    direction: ltr;
+    text-align: left;
+    font-family: monospace;
+    background: #0d151d;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin: 6px 0;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .modes {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .status-btn {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: #2b3947;
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .status-result {
+    margin-top: 8px;
+    font-size: 13px;
+    white-space: pre-line;
+  }
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>📡 CraftRadar</h1>
+
+<div class="tabs">
+  <div class="tab active" data-tab="iran">🇮🇷 ایرانی</div>
+  <div class="tab" data-tab="foreign">🌍 خارجی</div>
+</div>
+
+<div id="list"></div>
+<div class="toast" id="toast">کپی شد!</div>
+
+<script>
+const SERVERS = {
+  iran: [
+    { name: "GunMax", ip: "play.gunmax.org", mode: "Survival, Roleplay, SkyMine, BedWars" },
+    { name: "GameUp", ip: "mc.gameup.ir", mode: "Survival, SkyBlock, BedWars, Creative, Economy, Factions" },
+    { name: "Xcraft", ip: "play.xcraft.ir", mode: "Survival, SMP, SkyBlock, Practice, Parkour, SkyMine, Creative, BedWars" },
+    { name: "RexoCraft", ip: "play.rexocraft.com", mode: "BedWars, Survival, SkyMine, SkyBlock, ThePit, Arcade" },
+    { name: "Iran Minecraft", ip: "play.iranminecraft.com", mode: "Survival, SkyBlock, BedWars, Hunger Games, Minigames" },
+    { name: "TrexMine", ip: "play.trexmine.com", mode: "Survival, SkyBlock, BedWars, PvP, Minigames" },
+    { name: "MagicPixel", ip: "play.magicpixel.ir", mode: "Roleplay, RPG, SkyMine, SMP" },
+    { name: "InfinityStar", ip: "play.infinitystar.ir", mode: "Roleplay, Survival, SMP" },
+    { name: "HorizonNetwork", ip: "play.horizonnetwork.ir", mode: "SkyMine, SMP, ThePit, Survival" },
+    { name: "St Abad", ip: "play.stabad.ir", mode: "Survival, Practice" },
+    { name: "LunarProCraft", ip: "play.lunarprocraft.ir", mode: "OneBlock, Minigames, BedWars" },
+    { name: "ArianCraft", ip: "play.svariancraft.ir", mode: "BedWars, OneBlock, SkyBlock, Survival, Practice, Parkour" },
+    { name: "SUSIS MC", ip: "play.susismc.ir", mode: "Survival, SMP, Anarchy, Zombie" },
+    { name: "MineShard", ip: "mc.mineshard.top", mode: "PracticePvP, Bridge Training" },
+    { name: "OnyxMine", ip: "play.onyx-mc.ir", mode: "Survival و حالت‌های مختلف" },
+    { name: "VoidShot", ip: "play.voidshot.ir", mode: "Roleplay, BedWars, SkyBlock, Survival" },
+    { name: "PaladinGuard", ip: "java.paladinguard.ir", mode: "Survival, Roleplay, SMP, Bedrock" },
+    { name: "PandaSMP", ip: "play.pandasmp.ir", mode: "Lifesteal, SMP, Anarchy" },
+  ],
+  foreign: [
+    { name: "Pika Network", ip: "play.pika-network.net", mode: "BedWars, SkyBlock, Factions, Lifesteal, Prison, Survival, OneBlock, KitPvP", status: "Cracked" },
+    { name: "JartexNetwork", ip: "play.jartexnetwork.com", mode: "BedWars, SkyWars, Survival, Prison, SkyBlock, Factions, PvP", status: "Cracked" },
+    { name: "MineBerry", ip: "mc.mineberry.org", mode: "Survival, Anarchy, Economy, Factions, KitPvP, Minigames, PvP", status: "Cracked" },
+    { name: "HylexMC", ip: "play.hylexmc.net", mode: "BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
+    { name: "Twerion", ip: "twerion.net", mode: "BedWars, SkyBlock, PvP, Minigames, CityBuild", status: "Cracked" },
+    { name: "AppleMC", ip: "play.applemc.fun", mode: "Survival, BedWars, Earth, Lifesteal, Economy, PvP", status: "Cracked" },
+    { name: "UltimisMC", ip: "play.ultimismc.com", mode: "Survival, BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
+    { name: "LifestealSMP", ip: "play.lifestealsmp.com", mode: "Survival, Lifesteal, Earth, Factions, PvP, Minigames", status: "Cracked" },
+    { name: "6b6t", ip: "play.6b6t.org", mode: "Anarchy, Survival, PvP", status: "Cracked" },
+    { name: "OneBlocky", ip: "play.oneblocky.com", mode: "OneBlock, SkyBlock, Survival, Economy, PvP", status: "Cracked" },
+  ]
+};
+
+let currentTab = "iran";
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(() => (t.style.display = "none"), 1200);
+}
+
+function copyIp(ip) {
+  navigator.clipboard?.writeText(ip).catch(() => {});
+  showToast("آی‌پی کپی شد: " + ip);
+}
+
+async function checkStatus(ip, resultEl) {
+  resultEl.textContent = "در حال بررسی...";
+  const cleanIp = ip.split("/")[0].trim();
+  try {
+    let res = await fetch(`https://api.mcsrvstat.us/3/${cleanIp}`);
+    let data = await res.json();
+    if (data.online) {
+      resultEl.textContent = `🟢 آنلاین (Java) | 👥 ${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+      return;
+    }
+    res = await fetch(`https://api.mcsrvstat.us/bedrock/3/${cleanIp}`);
+    data = await res.json();
+    if (data.online) {
+      resultEl.textContent = `🟢 آنلاین (Bedrock) | 👥 ${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+      return;
+    }
+    resultEl.textContent = "🔴 آفلاین یا در دسترس نیست";
+  } catch (e) {
+    resultEl.textContent = "⚠️ خطا در بررسی وضعیت";
+  }
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  SERVERS[currentTab].forEach((s) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-title">
+        <span>🎮 ${s.name}</span>
+        ${s.status ? `<span class="badge">${s.status}</span>` : ""}
+      </div>
+      <div class="ip" title="برای کپی بزن">${s.ip}</div>
+      <div class="modes">${s.mode}</div>
+      <button class="status-btn">📡 بررسی وضعیت</button>
+      <div class="status-result"></div>
+    `;
+    card.querySelector(".ip").onclick = () => copyIp(s.ip);
+    const btn = card.querySelector(".status-btn");
+    const resultEl = card.querySelector(".status-result");
+    btn.onclick = () => checkStatus(s.ip, resultEl);
+    list.appendChild(card);
+  });
+}
+
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentTab = tab.dataset.tab;
+    render();
+  };
+});
+
+render();
+
+// آماده‌سازی مینی‌اپ برای نمایش کامل داخل بله
+if (window.Bale && window.Bale.WebApp) {
+  window.Bale.WebApp.ready();
+  window.Bale.WebApp.expand();
+}
+</script>
+</body>
+</html>
