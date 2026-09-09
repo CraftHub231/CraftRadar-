@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CraftRadar</title>
 <script src="https://tapi.bale.ai/miniapp.js?3"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --sky-top: #4a90d9;
@@ -29,12 +27,550 @@
   * { box-sizing: border-box; image-rendering: pixelated; }
   body {
     margin: 0;
-    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-family: Tahoma, sans-serif;
     background: var(--obsidian);
     color: var(--text);
     min-height: 100vh;
     padding-bottom: 90px;
   }
+  .pixel-font {
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ---------- بک‌گراند دنیای بلوکی ---------- */
+  .world-header {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 70%);
+    border-bottom: 6px solid var(--grass-dark);
+  }
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 2px;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.85);
+  }
+  .grass-strip {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 34px;
+    background:
+      repeating-linear-gradient(90deg, var(--grass) 0 16px, var(--grass-dark) 16px 18px) top / 100% 12px no-repeat,
+      repeating-linear-gradient(90deg, var(--dirt) 0 16px, var(--dirt-dark) 16px 18px) bottom / 100% 24px no-repeat;
+  }
+  .title-plate {
+    position: absolute;
+    top: 20px; left: 50%; transform: translateX(-50%);
+    text-align: center;
+    z-index: 2;
+  }
+  .title-plate h1 {
+    font-size: 15px;
+    margin: 0;
+    color: #fff;
+    text-shadow: 3px 3px 0 var(--grass-dark), -1px -1px 0 #000;
+    letter-spacing: 1px;
+  }
+  .title-plate p {
+    font-family: Tahoma;
+    font-size: 12px;
+    color: #fff;
+    margin: 10px 0 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+  }
+
+  /* ---------- پنل پیکسلی (سبک اینونتوری ماینکرفت) ---------- */
+  .pixel-panel {
+    background: var(--panel);
+    border: 2px solid #2a2a2a;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    border-radius: 14px;
+  }
+  .pixel-btn {
+    background: var(--stone-light);
+    border: 2px solid #2a2a2a;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border-radius: 10px;
+  }
+  .pixel-btn:active {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+  }
+  .pixel-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* ---------- محتوای اصلی ---------- */
+  .content { padding: 14px 12px; }
+
+  .hotbar {
+    display: flex;
+    gap: 6px;
+    background: var(--panel-dark);
+    border: 2px solid #2a2a2a;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    padding: 6px;
+    margin: -20px 12px 16px;
+    position: relative;
+    z-index: 3;
+    border-radius: 16px;
+    overflow-x: auto;
+  }
+  .slot {
+    flex: 1;
+    min-width: 64px;
+    text-align: center;
+    padding: 9px 4px;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--stone);
+    border: 2px solid #2a2a2a;
+    box-shadow: none;
+    cursor: pointer;
+    border-radius: 11px;
+    white-space: nowrap;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .slot.active {
+    background: var(--grass);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--gold);
+    font-weight: bold;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ---------- کارت سرور به‌شکل آیتم اینونتوری ---------- */
+  .server-card {
+    padding: 12px 13px;
+    margin-bottom: 12px;
+  }
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .server-logo {
+    width: 38px; height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 2px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    color: #fff;
+  }
+
+  .card-titles { flex: 1; min-width: 0; }
+  .card-titles .name { font-weight: 800; font-size: 14px; }
+  .card-titles .badges { display: flex; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
+  .pixel-badge {
+    font-size: 9.5px;
+    padding: 3px 7px;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+  .pixel-badge.green { background: var(--grass); color: #fff; }
+  .pixel-badge.diamond { background: var(--diamond); color: #063434; }
+
+  .ip-row {
+    direction: ltr;
+    text-align: left;
+    font-family: monospace;
+    background: var(--panel-dark);
+    border: 1.5px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin: 8px 0;
+    font-size: 13px;
+    color: var(--diamond);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+  }
+  .ip-row .hint { font-family: Tahoma; font-size: 10px; color: var(--muted); }
+
+  .modes-row {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row .pixel-btn {
+    flex: 1;
+    padding: 9px 4px;
+    font-size: 11px;
+  }
+  .btn-row .pixel-btn.status { background: var(--stone); }
+  .btn-row .pixel-btn.vote { background: var(--diamond); color: #063434; }
+
+  .status-out {
+    margin-top: 9px;
+    font-size: 12px;
+    background: var(--panel-dark);
+    border: 1.5px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 8px;
+    white-space: pre-line;
+    display: none;
+  }
+
+  /* ---------- بازی‌ها ---------- */
+  .game-panel {
+    padding: 18px 16px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .game-panel .pixel-font { font-size: 12px; margin-bottom: 6px; display: block; }
+  .game-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
+
+  .rps-row { display: flex; justify-content: center; gap: 10px; margin: 10px 0; }
+  .rps-block {
+    font-size: 26px;
+    width: 58px; height: 58px;
+    background: var(--stone);
+    border: 2px solid #2a2a2a;
+    border-radius: 14px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .rps-block:active { transform: translateY(1px) scale(0.96); }
+  .rps-out { min-height: 54px; font-size: 13px; margin-top: 10px; }
+  .score-row {
+    display: flex; justify-content: center; gap: 12px;
+    font-size: 11px; color: var(--muted); margin-top: 8px;
+  }
+  .score-row b { color: var(--gold); }
+
+  .guess-box {
+    width: 90px;
+    text-align: center;
+    font-size: 20px;
+    padding: 8px;
+    border: 2px solid #2a2a2a;
+    border-radius: 12px;
+    background: var(--panel-dark);
+    color: var(--gold);
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+  .guess-out { font-size: 13px; min-height: 40px; margin-top: 8px; }
+  .guess-tries { font-size: 10.5px; color: var(--muted); }
+
+  /* ---------- برترین‌ها ---------- */
+  .top-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; margin-bottom: 8px;
+  }
+  .rank-chip {
+    width: 28px; height: 28px;
+    background: var(--gold);
+    color: #3a2a00;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .top-row .name { flex: 1; font-size: 13px; font-weight: 700; }
+  .top-row .count { font-size: 11.5px; color: var(--diamond); }
+
+  .toast {
+    position: fixed;
+    bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--grass);
+    border: 2px solid #2a2a2a;
+    border-radius: 20px;
+    color: #fff;
+    padding: 9px 16px;
+    font-size: 12.5px;
+    font-weight: 800;
+    display: none;
+    z-index: 50;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+</style>
+</head>
+<body>
+
+
+<div class="world-header">
+  <div class="cloud" style="width:60px;height:16px;top:20px;left:10%;"></div>
+  <div class="cloud" style="width:44px;height:14px;top:40px;left:60%;"></div>
+  <div class="cloud" style="width:50px;height:14px;top:14px;left:75%;"></div>
+  <div class="title-plate">
+    <h1 class="pixel-font">CraftRadar</h1>
+    <p>رادار پیدا کردن سرورهای ماینکرفت ⛏️</p>
+  </div>
+  <div class="grass-strip"></div>
+</div>
+
+<div class="hotbar">
+  <div class="slot active" data-tab="iran">🇮🇷 ایران</div>
+  <div class="slot" data-tab="foreign">🌍 خارجی</div>
+  <div class="slot" data-tab="top">🏆 برترین‌ها</div>
+  <div class="slot" data-tab="games">🎮 بازی‌ها</div>
+</div>
+
+<div class="content">
+  <div class="section active" id="sec-iran"><div id="list-iran"></div></div>
+  <div class="section" id="sec-foreign"><div id="list-foreign"></div></div>
+  <div class="section" id="sec-top"><div id="list-top"></div></div>
+
+  <div class="section" id="sec-games">
+    <div class="pixel-panel game-panel">
+      <span class="pixel-font">RPS BATTLE</span>
+      <div class="game-sub">سنگ کاغذ قیچی با CraftRadar</div>
+      <div class="rps-row">
+        <div class="rps-block pixel-btn" data-c="🪨">🪨</div>
+        <div class="rps-block pixel-btn" data-c="📄">📄</div>
+        <div class="rps-block pixel-btn" data-c="✂️">✂️</div>
+      </div>
+      <div class="rps-out">یکی از گزینه‌ها رو انتخاب کن...</div>
+      <div class="score-row">
+        <span>برد: <b id="rps-win">0</b></span>
+        <span>باخت: <b id="rps-lose">0</b></span>
+        <span>مساوی: <b id="rps-draw">0</b></span>
+      </div>
+    </div>
+
+    <div class="pixel-panel game-panel">
+      <span class="pixel-font">GUESS IT</span>
+      <div class="game-sub">یه عدد بین ۱ تا ۱۰۰ حدس بزن</div>
+      <input type="number" class="guess-box" id="guess-input" placeholder="؟" min="1" max="100">
+      <br>
+      <button class="pixel-btn" style="width:130px;padding:9px;margin-top:8px;background:var(--diamond);color:#063434;" id="guess-submit">حدس بزن</button>
+      <div class="guess-out" id="guess-msg">آماده‌ای؟</div>
+      <div class="guess-tries" id="guess-tries"></div>
+      <button class="pixel-btn" style="width:130px;padding:9px;margin-top:10px;" id="guess-restart">🔁 بازی جدید</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  try {
+    runApp();
+  } catch (err) {
+    document.getElementById("list-iran").innerHTML =
+      `<div class="pixel-panel" style="padding:16px;color:#ff8080;font-size:12px;direction:ltr;text-align:left;">
+        خطا در اجرای برنامه:<br>${(err && err.message) || err}
+      </div>`;
+    console.error(err);
+  }
+});
+
+function runApp() {
+
+const SERVERS = {
+  iran: [
+    { name: "GunMax", ip: "play.gunmax.org", mode: "Survival, Roleplay, SkyMine, BedWars" },
+    { name: "GameUp", ip: "mc.gameup.ir", mode: "Survival, SkyBlock, BedWars, Creative, Economy, Factions" },
+    { name: "Xcraft", ip: "play.xcraft.ir", mode: "Survival, SMP, SkyBlock, Practice, Parkour, SkyMine, Creative, BedWars" },
+    { name: "RexoCraft", ip: "play.rexocraft.com", mode: "BedWars, Survival, SkyMine, SkyBlock, ThePit, Arcade" },
+    { name: "Iran Minecraft", ip: "play.iranminecraft.com", mode: "Survival, SkyBlock, BedWars, Hunger Games, Minigames" },
+    { name: "TrexMine", ip: "play.trexmine.com", mode: "Survival, SkyBlock, BedWars, PvP, Minigames" },
+    { name: "MagicPixel", ip: "play.magicpixel.ir", mode: "Roleplay, RPG, SkyMine, SMP" },
+    { name: "InfinityStar", ip: "play.infinitystar.ir", mode: "Roleplay, Survival, SMP" },
+    { name: "HorizonNetwork", ip: "play.horizonnetwork.ir", mode: "SkyMine, SMP, ThePit, Survival" },
+    { name: "St Abad", ip: "play.stabad.ir", mode: "Survival, Practice" },
+    { name: "LunarProCraft", ip: "play.lunarprocraft.ir", mode: "OneBlock, Minigames, BedWars" },
+    { name: "ArianCraft", ip: "play.svariancraft.ir", mode: "BedWars, OneBlock, SkyBlock, Survival, Practice, Parkour" },
+    { name: "SUSIS MC", ip: "play.susismc.ir", mode: "Survival, SMP, Anarchy, Zombie" },
+    { name: "MineShard", ip: "mc.mineshard.top", mode: "PracticePvP, Bridge Training" },
+    { name: "OnyxMine", ip: "play.onyx-mc.ir", mode: "Survival و حالت‌های مختلف" },
+    { name: "VoidShot", ip: "play.voidshot.ir", mode: "Roleplay, BedWars, SkyBlock, Survival" },
+    { name: "PaladinGuard", ip: "java.paladinguard.ir", mode: "Survival, Roleplay, SMP, Bedrock" },
+    { name: "PandaSMP", ip: "play.pandasmp.ir", mode: "Lifesteal, SMP, Anarchy" },
+    { name: "ColdGame", ip: "play.coldgame.ir", mode: "Survival, SlimeFun, SkyMine, Practice" },
+    { name: "BitCraft", ip: "play.bitonetop.com", mode: "Survival, PvP, Economy" },
+    { name: "RubyLand", ip: "play.mcbe.ir", mode: "Bedrock Survival, Economy, Roleplay" },
+  ],
+  foreign: [
+    { name: "Pika Network", ip: "play.pika-network.net", mode: "BedWars, SkyBlock, Factions, Lifesteal, Prison, Survival, OneBlock, KitPvP", status: "Cracked" },
+    { name: "JartexNetwork", ip: "play.jartexnetwork.com", mode: "BedWars, SkyWars, Survival, Prison, SkyBlock, Factions, PvP", status: "Cracked" },
+    { name: "MineBerry", ip: "mc.mineberry.org", mode: "Survival, Anarchy, Economy, Factions, KitPvP, Minigames, PvP", status: "Cracked" },
+    { name: "HylexMC", ip: "play.hylexmc.net", mode: "BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
+    { name: "Twerion", ip: "twerion.net", mode: "BedWars, SkyBlock, PvP, Minigames, CityBuild", status: "Cracked" },
+    { name: "AppleMC", ip: "play.applemc.fun", mode: "Survival, BedWars, Earth, Lifesteal, Economy, PvP", status: "Cracked" },
+    { name: "UltimisMC", ip: "play.ultimismc.com", mode: "Survival, BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
+    { name: "LifestealSMP", ip: "play.lifestealsmp.com", mode: "Survival, Lifesteal, Earth, Factions, PvP, Minigames", status: "Cracked" },
+    { name: "6b6t", ip: "play.6b6t.org", mode: "Anarchy, Survival, PvP", status: "Cracked" },
+    { name: "OneBlocky", ip: "play.oneblocky.com", mode: "OneBlock, SkyBlock, Survival, Economy, PvP", status: "Cracked" },
+  ]
+};
+
+const ICONS = ["grass", "diamond", "gold", "stone"];
+function iconFor(name) {
+  let h = 0;
+  for (const c of name) h = (h + c.charCodeAt(0)) % ICONS.length;
+  return ICONS[h];
+}
+
+// ==================== رأی‌ها ====================
+function loadVotes() {
+  try { return JSON.parse(localStorage.getItem("craftradar_votes") || "{}"); }
+  catch (e) { return {}; }
+}
+function saveVotes(v) { localStorage.setItem("craftradar_votes", JSON.stringify(v)); }
+let votes = loadVotes();
+function getVotes(name) { return votes[name] || 0; }
+
+function loadVotedServers() {
+  try { return JSON.parse(localStorage.getItem("craftradar_voted") || "[]"); }
+  catch (e) { return []; }
+}
+function saveVotedServers(list) { localStorage.setItem("craftradar_voted", JSON.stringify(list)); }
+let votedServers = loadVotedServers();
+function hasVoted(name) { return votedServers.includes(name); }
+
+function addVote(name) {
+  if (hasVoted(name)) return null;
+  votes[name] = (votes[name] || 0) + 1;
+  saveVotes(votes);
+  votedServers.push(name);
+  saveVotedServers(votedServers);
+  return votes[name];
+}
+
+// ==================== توست ====================
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(() => (t.style.display = "none"), 1300);
+}
+function copyIp(ip) {
+  navigator.clipboard?.writeText(ip).catch(() => {});
+  showToast("📋 کپی شد: " + ip);
+}
+
+// ==================== وضعیت زنده ====================
+async function checkStatus(ip, outEl, btn) {
+  outEl.style.display = "block";
+  outEl.textContent = "⏳ در حال بررسی...";
+  btn.disabled = true;
+  const cleanIp = ip.split("/")[0].trim();
+  try {
+    let res = await fetch(`https://api.mcsrvstat.us/3/${cleanIp}`);
+    let data = await res.json();
+    if (data.online) {
+      outEl.textContent = `🟢 آنلاین (Java)\n🌐 IP عددی: ${data.ip ?? "?"}\n👥 پلیر: ${data.players?.online ?? "?"}/${data.players?.max ?? "?"}\n🧱 نسخه: ${data.version ?? "?"}`;
+      btn.disabled = false;
+      return;
+    }
+    res = await fetch(`https://api.mcsrvstat.us/bedrock/3/${cleanIp}`);
+    data = await res.json();
+    if (data.online) {
+      outEl.textContent = `🟢 آنلاین (Bedrock)\n🌐 IP عددی: ${data.ip ?? "?"}\n👥 پلیر: ${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+      btn.disabled = false;
+      return;
+    }
+    outEl.textContent = "🔴 آفلاین یا در دسترس نیست";
+  } catch (e) {
+    outEl.textContent = "⚠️ خطا در بررسی وضعیت";
+  }
+  btn.disabled = false;
+}
+
+// ==================== رندر لیست ====================
+function renderList(category, containerId) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = "";
+  SERVERS[category].forEach((s) => {
+    const card = document.createElement("div");
+    card.className = "pixel-panel server-card";
+    card.innerHTML = `
+      <div class="card-top">
+        <img class="server-logo" src="https://www.google.com/s2/favicons?sz=128&domain=${s.ip.split('/')[0].split(':')[0]}" alt="" onerror="this.style.display='none'">
+        <div class="card-titles">
+          <div class="name">${s.name}</div>
+          <div class="badges">
+            ${s.status ? `<span class="pixel-badge green">${s.status}</span>` : ""}
+            <span class="pixel-badge gold votes-badge">🗳️ ${getVotes(s.name)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="ip-row">${s.ip} <span class="hint">کپی</span></div>
+      <div class="modes-row">${s.mode}</div>
+      <div class="btn-row">
+        <button class="pixel-btn status">📡 وضعیت</button>
+        <button class="pixel-btn vote">🗳️ رأی</button>
+      </div>
+      <div class="status-out"></div>
+    `;
+    card.querySelector(".ip-row").onclick = () => copyIp(s.ip);
+    const statusBtn = card.querySelector(".pixel-btn.status");
+    const outEl = card.querySelector(".status-out");
+    statusBtn.onclick = () => checkStatus(s.ip, outEl, statusBtn);
+
+    const voteBtn = card.querySelector(".pixel-btn.vote");
+    const votesBadge = card.querySelector(".votes-badge");
+    if (hasVoted(s.name)) {
+      voteBtn.textContent = "✅ رأی دادی";
+      voteBtn.disabled = true;
+    }
+    voteBtn.onclick = () => {
+      const newTotal = addVote(s.name);
+      if (newTotal === null) {
+        showToast(`⚠️ قبلاً به ${s.name} رأی دادی`);
+        return;
+      }
+      votesBadge.textContent = `🗳️ ${newTotal}`;
+      voteBtn.textContent = "✅ رأی دادی";
+      voteBtn.disabled = true;
+      showToast(`🗳️ به ${s.name} رأی دادی!`);
+    };
+    list.appendChild(card);
+  });
+}
+
+function renderTop() {
+  const all = [...SERVERS.iran, ...SERVERS.foreign];
+  const sorted = [...all].sort((a, b) => getVotes(b.name) - getVotes(a.name));
+  const list = document.getElementById("list-top");
+  list.innerHTML = "";
+  if (sorted.every(s => getVotes(s.name) === 0)) {
+    list.innerHTML = `<div class="pixel-panel" style="padding:20px;text-align:center;color:var(--muted);font-size:12.5px;">هنوز کسی رأی نداده! برو تو تب سرورها و اولین نفر باش 🚀</div>`;
+    return;
+  }
+  sorted.slice(0, 10).forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "pixel-panel top-row";
+    row.innerHTML = `
+      <div class="rank-chip">${i + 1}</div>
+      <div class="name">${s.name}</div>
+      <div class="count">🗳️ ${getVotes(s.name)} رأی</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+document.querySelectorAll(".slot").forEach((slot) => {
+  slot.onclick = () => {
+    document.querySelectorAll(".slot").forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+    slot.classList.add("active");
+    document.getElementById("sec-" + slot.dataset.tab).classList.add("active");
+    if (slot.datase  }
   .pixel-font { font-family: 'Press Start 2P', cursive; }
 
   /* ---------- بک‌گراند دنیای بلوکی ---------- */
