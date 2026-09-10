@@ -1,580 +1,3544 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>CraftRadar</title>
+
+<title>CraftRadar — Minecraft Server Radar</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --sky1: #3a7bd5;
-    --sky2: #8ec9ef;
-    --grass: #5d9c3f;
-    --grass-dk: #3f6b1f;
-    --dirt: #7a4a26;
-    --dirt-dk: #4f2f18;
-    --panel: #322d28;
-    --panel-lt: #423b34;
-    --ink: #f4f0e8;
-    --muted: #b3a99a;
-    --gold: #f0b92d;
-    --diamond: #57d8d0;
-    --redstone: #d94a34;
-    --radius: 14px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
-    background: #1c1712;
-    color: var(--ink);
-    padding-bottom: 60px;
+:root{
+  --bg:#030607;
+  --bg2:#07100d;
+  --panel:rgba(10,18,15,.82);
+  --panel2:rgba(14,24,20,.94);
+  --cyan:#00e8ff;
+  --cyan2:#00aeca;
+  --green:#70e34d;
+  --green2:#a2ff7d;
+  --gold:#ffc94a;
+  --red:#ff5c50;
+  --purple:#a879ff;
+  --text:#edf8f0;
+  --muted:#82958b;
+  --line:rgba(0,232,255,.16);
+  --line2:rgba(0,232,255,.38);
+  --shadow:0 20px 60px rgba(0,0,0,.42);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:'Vazirmatn',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% -15%,rgba(0,232,255,.12),transparent 35%),
+    radial-gradient(circle at 100% 10%,rgba(112,227,77,.08),transparent 28%),
+    radial-gradient(circle at 0% 70%,rgba(168,121,255,.05),transparent 30%),
+    var(--bg);
+  overflow-x:hidden;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.035;
+  background-image:
+    linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px);
+  background-size:42px 42px;
+}
+
+button,
+input{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.pixel{
+  font-family:'Press Start 2P',monospace;
+  direction:ltr;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  position:relative;
+  padding:26px 18px 22px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(3,7,6,.7),rgba(3,7,6,.25));
+}
+
+.header-inner{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.logo{
+  width:64px;
+  height:64px;
+  border-radius:18px;
+  object-fit:cover;
+  border:2px solid var(--cyan);
+  background:#08100d;
+  box-shadow:
+    0 0 0 4px rgba(0,232,255,.07),
+    0 0 35px rgba(0,232,255,.22);
+}
+
+.brand h1{
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:-.5px;
+  background:linear-gradient(100deg,#fff 20%,var(--cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.brand-sub{
+  color:var(--green2);
+  font-size:9px;
+  margin-top:6px;
+  letter-spacing:1px;
+}
+
+.user-area{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn-login,
+.btn-logout{
+  padding:10px 16px;
+  border:1px solid var(--line2);
+  border-radius:13px;
+  background:var(--panel);
+  color:var(--text);
+  font-size:13px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.btn-login:hover,
+.btn-logout:hover{
+  border-color:var(--cyan);
+  color:var(--cyan);
+  box-shadow:0 0 20px rgba(0,232,255,.12);
+}
+
+.user-badge{
+  padding:8px 13px;
+  border-radius:20px;
+  border:1px solid rgba(112,227,77,.3);
+  background:rgba(112,227,77,.08);
+  color:var(--green2);
+  font-size:12px;
+  font-weight:700;
+}
+
+.hero{
+  margin-top:22px;
+}
+
+.hero h2{
+  font-size:24px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.hero p{
+  max-width:700px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.9;
+}
+
+.stats{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.stat{
+  position:relative;
+  overflow:hidden;
+  padding:15px;
+  text-align:center;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(12,23,18,.9),rgba(7,13,11,.75));
+}
+
+.stat:after{
+  content:"";
+  position:absolute;
+  width:80px;
+  height:80px;
+  right:-30px;
+  bottom:-40px;
+  border-radius:50%;
+  background:rgba(0,232,255,.08);
+  filter:blur(15px);
+}
+
+.stat .number{
+  font-size:23px;
+  font-weight:900;
+  color:var(--green2);
+}
+
+.stat .label{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+/* ================= NAV ================= */
+
+.tabs-wrap{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(3,7,6,.88);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+
+.tabs{
+  max-width:1100px;
+  margin:auto;
+  padding:11px 16px;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+}
+
+.tabs::-webkit-scrollbar{
+  height:0;
+}
+
+.tab{
+  white-space:nowrap;
+  padding:10px 17px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:rgba(10,18,15,.75);
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.tab:hover{
+  color:var(--text);
+}
+
+.tab.active{
+  color:var(--cyan);
+  border-color:var(--cyan);
+  background:linear-gradient(135deg,rgba(0,232,255,.13),rgba(112,227,77,.06));
+  box-shadow:0 0 20px rgba(0,232,255,.1);
+}
+
+/* ================= CONTENT ================= */
+
+.container{
+  width:min(1100px,100%);
+  margin:auto;
+  padding:20px 16px 60px;
+}
+
+.section{
+  display:none;
+}
+
+.section.active{
+  display:block;
+}
+
+.toolbar{
+  margin-bottom:17px;
+}
+
+.search-row{
+  display:flex;
+  gap:9px;
+}
+
+.search{
+  flex:1;
+  padding:13px 15px;
+  color:var(--text);
+  background:rgba(4,9,7,.9);
+  border:1px solid var(--line);
+  border-radius:14px;
+  font-size:14px;
+}
+
+.search:focus{
+  outline:none;
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(0,232,255,.08);
+}
+
+.refresh{
+  width:48px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel);
+  color:var(--cyan);
+  font-size:18px;
+}
+
+.refresh:hover{
+  border-color:var(--cyan);
+}
+
+.filters{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+}
+
+.chips{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.chip{
+  padding:7px 12px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.chip.active{
+  color:var(--cyan);
+  border-color:var(--cyan);
+  background:rgba(0,232,255,.1);
+}
+
+.check-all{
+  white-space:nowrap;
+  padding:9px 13px;
+  border-radius:12px;
+  border:1px solid var(--line2);
+  background:var(--panel2);
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+}
+
+.check-all:hover{
+  color:var(--cyan);
+  border-color:var(--cyan);
+}
+
+/* ================= SERVER GRID ================= */
+
+.server-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:13px;
+}
+
+.server-card{
+  position:relative;
+  overflow:hidden;
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:
+    linear-gradient(145deg,rgba(13,24,20,.92),rgba(7,13,11,.88));
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+  opacity:0;
+  transform:translateY(18px);
+  transition:
+    opacity .4s,
+    transform .4s,
+    border-color .2s,
+    box-shadow .2s;
+}
+
+.server-card.landed{
+  opacity:1;
+  transform:none;
+}
+
+.server-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--line2);
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.35),
+    0 0 25px rgba(0,232,255,.06);
+}
+
+.server-card:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:.5;
+}
+
+.server-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.server-logo{
+  width:56px;
+  height:56px;
+  border-radius:15px;
+  object-fit:cover;
+  background:#07100c;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 0 20px rgba(0,0,0,.35);
+}
+
+.server-title{
+  min-width:0;
+  flex:1;
+}
+
+.server-name{
+  font-size:16px;
+  font-weight:900;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.server-badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:6px;
+}
+
+.badge{
+  padding:3px 8px;
+  border-radius:7px;
+  border:1px solid;
+  font-size:10px;
+  font-weight:800;
+}
+
+.badge-java{
+  color:var(--cyan);
+  background:rgba(0,232,255,.08);
+  border-color:rgba(0,232,255,.25);
+}
+
+.badge-bedrock{
+  color:#75ffb2;
+  background:rgba(70,255,150,.07);
+  border-color:rgba(70,255,150,.22);
+}
+
+.badge-cracked{
+  color:#ff8a7d;
+  background:rgba(255,92,80,.08);
+  border-color:rgba(255,92,80,.25);
+}
+
+.badge-premium{
+  color:var(--gold);
+  background:rgba(255,201,74,.08);
+  border-color:rgba(255,201,74,.25);
+}
+
+.badge-votes{
+  color:var(--green2);
+  background:rgba(112,227,77,.08);
+  border-color:rgba(112,227,77,.25);
+}
+
+.status-indicator{
+  min-width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#5b675f;
+}
+
+.status-indicator.online{
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+.status-indicator.offline{
+  background:var(--red);
+}
+
+.status-indicator.loading{
+  background:var(--gold);
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  50%{opacity:.35}
+}
+
+/* ================= IP ================= */
+
+.ip-box{
+  direction:ltr;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:13px;
+  padding:11px 13px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(2,6,5,.8);
+  color:var(--cyan);
+  font-family:Consolas,monospace;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.ip-box:hover{
+  border-color:var(--cyan);
+  background:rgba(0,232,255,.05);
+}
+
+.ip-copy{
+  color:var(--muted);
+  font-family:'Vazirmatn';
+  font-size:10px;
+}
+
+/* ================= CARD INFO ================= */
+
+.server-modes{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.7;
+}
+
+.quick-info{
+  display:flex;
+  gap:8px;
+  margin-top:11px;
+  flex-wrap:wrap;
+}
+
+.quick{
+  padding:6px 9px;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  color:var(--muted);
+  font-size:11px;
+}
+
+.card-buttons{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-top:13px;
+}
+
+.action-btn{
+  padding:9px 5px;
+  border-radius:11px;
+  border:1px solid var(--line);
+  background:rgba(15,24,20,.9);
+  color:var(--text);
+  font-size:11px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.action-btn:hover:not(:disabled){
+  transform:translateY(-1px);
+  border-color:var(--cyan);
+  color:var(--cyan);
+}
+
+.action-btn.vote{
+  color:var(--green2);
+  border-color:rgba(112,227,77,.25);
+}
+
+.action-btn.vote:hover{
+  border-color:var(--green);
+}
+
+.action-btn:disabled{
+  opacity:.45;
+  cursor:default;
+}
+
+/* ================= STATUS PANEL ================= */
+
+.status-panel{
+  display:none;
+  margin-top:11px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(2,7,5,.72);
+}
+
+.status-panel.show{
+  display:block;
+  animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+
+.status-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:4px 0;
+  font-size:12px;
+}
+
+.status-key{
+  color:var(--muted);
+}
+
+.status-value{
+  direction:ltr;
+  text-align:left;
+  font-family:Consolas,monospace;
+  color:var(--text);
+  max-width:70%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ================= PLAYERS ================= */
+
+.players-panel{
+  display:none;
+  margin-top:11px;
+  padding:12px;
+  border:1px solid rgba(112,227,77,.18);
+  border-radius:13px;
+  background:rgba(6,15,9,.75);
+}
+
+.players-panel.show{
+  display:block;
+}
+
+.players-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--green2);
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.copy-all{
+  border:0;
+  background:none;
+  color:var(--cyan);
+  font-size:10px;
+}
+
+.players-list{
+  max-height:155px;
+  overflow-y:auto;
+  direction:ltr;
+  text-align:left;
+}
+
+.player{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin:3px;
+  padding:5px 8px;
+  border-radius:7px;
+  background:rgba(0,232,255,.06);
+  border:1px solid rgba(0,232,255,.14);
+  color:var(--text);
+  font-family:Consolas,monospace;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.player:hover{
+  border-color:var(--cyan);
+  color:var(--cyan);
+}
+
+/* ================= TOP ================= */
+
+.top-hero{
+  padding:22px;
+  margin-bottom:15px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(0,232,255,.07),rgba(112,227,77,.04));
+}
+
+.top-hero h2{
+  font-size:21px;
+  font-weight:900;
+}
+
+.top-hero p{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:5px;
+}
+
+.ranking{
+  display:grid;
+  gap:9px;
+}
+
+.rank{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--panel);
+}
+
+.rank-position{
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  color:var(--cyan);
+  background:rgba(0,232,255,.08);
+  border:1px solid var(--line2);
+  font-weight:900;
+}
+
+.rank-logo{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  object-fit:cover;
+}
+
+.rank-name{
+  flex:1;
+  font-size:14px;
+  font-weight:800;
+}
+
+.rank-votes{
+  color:var(--green2);
+  font-size:12px;
+  font-weight:800;
+}
+
+/* ================= SCOREBOARD ================= */
+
+.scoreboard-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.score-selector{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--panel);
+}
+
+.score-selector h2{
+  font-size:18px;
+  margin-bottom:12px;
+}
+
+.server-select{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#07100d;
+  color:var(--text);
+  font-family:inherit;
+}
+
+.server-select:focus{
+  outline:none;
+  border-color:var(--cyan);
+}
+
+.scoreboard{
+  position:relative;
+  padding:20px;
+  border-radius:18px;
+  border:1px solid rgba(0,232,255,.35);
+  background:
+    radial-gradient(circle at 50% 0,rgba(0,232,255,.1),transparent 45%),
+    #050908;
+  box-shadow:var(--shadow);
+}
+
+.scoreboard-header{
+  text-align:center;
+  color:var(--cyan);
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:14px;
+}
+
+.score-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px dashed rgba(255,255,255,.07);
+  font-family:Consolas,monospace;
+  font-size:12px;
+}
+
+.score-line:last-child{
+  border-bottom:0;
+}
+
+.score-key{
+  color:var(--muted);
+}
+
+.score-value{
+  direction:ltr;
+  color:var(--green2);
+  text-align:right;
+}
+
+.score-motd{
+  margin-top:12px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.8;
+}
+
+.copy-score{
+  width:100%;
+  margin-top:13px;
+  padding:11px;
+  border:1px solid var(--cyan);
+  border-radius:12px;
+  background:rgba(0,232,255,.08);
+  color:var(--cyan);
+  font-weight:900;
+}
+
+/* ================= EMPTY ================= */
+
+.empty{
+  padding:42px 20px;
+  text-align:center;
+  border:1px dashed var(--line);
+  border-radius:17px;
+  color:var(--muted);
+  line-height:2;
+  grid-column:1/-1;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  position:relative;
+  width:min(430px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:25px;
+  border:1px solid var(--line2);
+  border-radius:24px;
+  background:linear-gradient(165deg,#0d1814,#070d0b);
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+}
+
+.close{
+  position:absolute;
+  top:12px;
+  left:15px;
+  width:35px;
+  height:35px;
+  border:0;
+  background:none;
+  color:var(--muted);
+  font-size:25px;
+}
+
+.close:hover{
+  color:var(--cyan);
+}
+
+.modal-title{
+  text-align:center;
+  color:var(--cyan);
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+
+.modal-sub{
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:20px;
+}
+
+.login-input{
+  width:100%;
+  padding:13px;
+  margin-bottom:10px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:#050a08;
+  color:var(--text);
+}
+
+.login-input:focus{
+  outline:none;
+  border-color:var(--cyan);
+}
+
+.login-submit{
+  width:100%;
+  padding:13px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(90deg,var(--cyan),#00bcd4);
+  color:#021012;
+  font-weight:900;
+}
+
+.detail-logo{
+  display:block;
+  width:75px;
+  height:75px;
+  margin:0 auto 10px;
+  border-radius:18px;
+  object-fit:cover;
+  border:1px solid var(--line2);
+}
+
+.detail-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.detail-item{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:11px;
+  background:rgba(255,255,255,.025);
+}
+
+.detail-item small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:3px;
+}
+
+.detail-item strong{
+  direction:ltr;
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:11px;
+}
+
+/* ================= TOAST ================= */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  z-index:300;
+  transform:translateX(-50%) translateY(15px);
+  padding:11px 19px;
+  border-radius:13px;
+  background:linear-gradient(135deg,var(--green2),var(--green));
+  color:#031007;
+  font-size:13px;
+  font-weight:900;
+  box-shadow:0 10px 30px rgba(112,227,77,.3);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+  margin-top:45px;
+  padding-top:22px;
+  border-top:1px solid var(--line);
+  text-align:center;
+}
+
+.footer-logo{
+  color:var(--cyan);
+  font-size:14px;
+  font-weight:900;
+}
+
+.footer p{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.8;
+}
+
+.footer .pixel{
+  margin-top:10px;
+  color:#496057;
+  font-size:7px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:800px){
+  .server-grid,
+  .scoreboard-layout{
+    grid-template-columns:1fr;
   }
 
-  /* ---------- هدر ---------- */
-  .hero {
-    position: relative;
-    height: 148px;
-    background: linear-gradient(180deg, var(--sky1) 0%, var(--sky2) 100%);
-    overflow: hidden;
+  .stats{
+    grid-template-columns:repeat(2,1fr);
   }
-  .cloud {
-    position: absolute;
-    background: rgba(255,255,255,0.92);
-    border-radius: 40px;
-  }
-  .sun {
-    position: absolute;
-    top: 14px; left: 18px;
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    background: var(--gold);
-    box-shadow: 0 0 0 6px rgba(240,185,45,0.25);
-  }
-  .ground {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 26px;
-    background: repeating-linear-gradient(90deg, var(--grass) 0 22px, var(--grass-dk) 22px 24px);
-    border-bottom: 12px solid var(--dirt);
-    box-shadow: 0 12px 0 -2px var(--dirt-dk) inset;
-  }
-  .hero-text {
-    position: absolute;
-    top: 50px; left: 0; right: 0;
-    text-align: center;
-    z-index: 2;
-    padding: 0 16px;
-  }
-  .hero-text h1 {
-    margin: 0;
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    color: #fff;
-    text-shadow: 2px 2px 0 var(--grass-dk);
-  }
-  .hero-text p {
-    margin: 8px 0 0;
-    font-size: 12.5px;
-    color: #fff;
-    opacity: 0.95;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.35);
+}
+
+@media(max-width:560px){
+  .header{
+    padding:19px 13px;
   }
 
-  /* ---------- تب‌ها ---------- */
-  .tabbar {
-    display: flex;
-    gap: 6px;
-    background: var(--panel);
-    padding: 6px;
-    margin: 0 12px;
-    position: relative;
-    top: -14px;
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-    overflow-x: auto;
-    z-index: 3;
-  }
-  .tab {
-    flex: 1;
-    min-width: 68px;
-    text-align: center;
-    padding: 10px 4px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    background: var(--panel-lt);
-    border-radius: 11px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.15s, color 0.15s;
-  }
-  .tab.active {
-    background: var(--grass);
-    color: #fff;
+  .header-top{
+    align-items:flex-start;
   }
 
-  .wrap { padding: 4px 12px 16px; }
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* ---------- کارت سرور ---------- */
-  .card {
-    background: var(--panel);
-    border-radius: var(--radius);
-    padding: 13px 14px;
-    margin-bottom: 11px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-  }
-  .card-head { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
-  .avatar {
-    width: 40px; height: 40px;
-    border-radius: 11px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900;
-    font-size: 15px;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  }
-  .card-titles { flex: 1; min-width: 0; }
-  .card-titles .name { font-weight: 800; font-size: 14.5px; }
-  .badge-row { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
-  .badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 20px;
-  }
-  .badge.cracked { background: rgba(93,156,63,0.25); color: #8fd66b; }
-  .badge.votes { background: rgba(87,216,208,0.2); color: var(--diamond); }
-
-  .ip-line {
-    direction: ltr;
-    text-align: left;
-    font-family: 'SFMono-Regular', Consolas, monospace;
-    background: #1e1a16;
-    border-radius: 10px;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: var(--diamond);
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .ip-line .hint { font-family: -apple-system, Tahoma; font-size: 10px; color: var(--muted); }
-
-  .modes { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
-
-  .btn-row { display: flex; gap: 8px; }
-  .btn {
-    flex: 1;
-    padding: 9px 6px;
-    font-size: 11.5px;
-    font-weight: 700;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    color: #fff;
-    transition: opacity 0.15s;
-  }
-  .btn:active { opacity: 0.75; }
-  .btn:disabled { opacity: 0.45; cursor: default; }
-  .btn.status-btn { background: #4a4038; }
-  .btn.vote-btn { background: var(--diamond); color: #06302c; }
-
-  .status-box {
-    margin-top: 9px;
-    background: #1e1a16;
-    border-radius: 10px;
-    padding: 9px;
-    font-size: 12px;
-    white-space: pre-line;
-    display: none;
+  .logo{
+    width:51px;
+    height:51px;
+    border-radius:14px;
   }
 
-  /* ---------- بازی‌ها ---------- */
-  .game-card {
-    background: var(--panel);
-    border-radius: var(--radius);
-    padding: 20px 16px;
-    text-align: center;
-    margin-bottom: 14px;
-  }
-  .game-card h3 { margin: 0 0 4px; font-size: 15px; }
-  .game-card .sub { font-size: 11.5px; color: var(--muted); margin-bottom: 16px; }
-
-  .rps-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
-  .rps-choice {
-    width: 56px; height: 56px;
-    font-size: 24px;
-    background: var(--panel-lt);
-    border-radius: 14px;
-    cursor: pointer;
-    border: none;
-  }
-  .rps-choice:active { transform: scale(0.94); }
-  .rps-out { min-height: 50px; font-size: 13.5px; }
-  .score-row { display: flex; justify-content: center; gap: 14px; font-size: 11px; color: var(--muted); margin-top: 10px; }
-  .score-row b { color: var(--gold); }
-
-  .guess-input {
-    width: 96px;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 900;
-    padding: 8px;
-    border-radius: 12px;
-    border: none;
-    background: #1e1a16;
-    color: var(--gold);
-    margin-bottom: 10px;
-  }
-  .guess-out { font-size: 13px; min-height: 38px; margin-top: 8px; }
-  .guess-tries { font-size: 10.5px; color: var(--muted); }
-  .wide-btn { padding: 10px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; color: #fff; }
-
-  /* ---------- برترین‌ها ---------- */
-  .rank-row {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--panel);
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-  }
-  .rank-num {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: var(--gold);
-    color: #3a2a00;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11.5px; font-weight: 900;
-    flex-shrink: 0;
-  }
-  .rank-row .name { flex: 1; font-size: 13px; font-weight: 700; }
-  .rank-row .count { font-size: 11.5px; color: var(--diamond); }
-  .empty-note {
-    background: var(--panel);
-    border-radius: var(--radius);
-    padding: 22px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 12.5px;
+  .brand h1{
+    font-size:19px;
   }
 
-  .toast {
-    position: fixed;
-    bottom: 16px; left: 50%; transform: translateX(-50%);
-    background: var(--grass);
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 24px;
-    font-size: 12.5px;
-    font-weight: 800;
-    display: none;
-    z-index: 50;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  .brand-sub{
+    font-size:7px;
   }
 
-  .boot-error {
-    margin: 16px 12px;
-    background: var(--panel);
-    border-radius: var(--radius);
-    padding: 16px;
-    color: #ff9d8a;
-    font-size: 12.5px;
-    direction: ltr;
-    text-align: left;
+  .hero h2{
+    font-size:20px;
   }
+
+  .user-area .user-badge{
+    display:none;
+  }
+
+  .stats{
+    gap:7px;
+  }
+
+  .stat{
+    padding:12px 5px;
+  }
+
+  .stat .number{
+    font-size:19px;
+  }
+
+  .filters{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .check-all{
+    width:100%;
+  }
+
+  .card-buttons{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .server-card{
+    padding:14px;
+  }
+}
 </style>
 </head>
+
 <body>
 
-<div class="hero">
-  <div class="sun"></div>
-  <div class="cloud" style="width:36px;height:16px;top:16px;left:55%;"></div>
-  <div class="cloud" style="width:26px;height:12px;top:24px;left:70%;"></div>
-  <div class="hero-text">
-    <h1>CraftRadar</h1>
-    <p>رادار پیدا کردن سرورهای ماینکرفت ⛏️</p>
-  </div>
-  <div class="ground"></div>
-</div>
+<!-- ================= HEADER ================= -->
 
-<div class="tabbar" id="tabbar">
-  <div class="tab active" data-tab="iran">🇮🇷 ایران</div>
-  <div class="tab" data-tab="foreign">🌍 خارجی</div>
-  <div class="tab" data-tab="top">🏆 برترین‌ها</div>
-  <div class="tab" data-tab="games">🎮 بازی‌ها</div>
-</div>
+<header class="header">
+  <div class="header-inner">
 
-<div class="wrap">
-  <div class="section active" id="sec-iran"><div id="list-iran"></div></div>
-  <div class="section" id="sec-foreign"><div id="list-foreign"></div></div>
-  <div class="section" id="sec-top"><div id="list-top"></div></div>
+    <div class="header-top">
 
-  <div class="section" id="sec-games">
-    <div class="game-card">
-      <h3>سنگ کاغذ قیچی</h3>
-      <div class="sub">یه دست مسابقه با CraftRadar</div>
-      <div class="rps-row">
-        <button class="rps-choice" data-c="🪨">🪨</button>
-        <button class="rps-choice" data-c="📄">📄</button>
-        <button class="rps-choice" data-c="✂️">✂️</button>
+      <div class="brand">
+        <img
+          class="logo"
+          id="mainLogo"
+          alt="CraftRadar"
+          src="https://api.mcstatus.io/v2/icon/mc.hypixel.net"
+        >
+
+        <div>
+          <h1>CraftRadar</h1>
+          <div class="brand-sub pixel">SERVER RADAR • 2026</div>
+        </div>
       </div>
-      <div class="rps-out" id="rps-out">یکی از گزینه‌ها رو انتخاب کن...</div>
-      <div class="score-row">
-        <span>برد: <b id="rps-win">0</b></span>
-        <span>باخت: <b id="rps-lose">0</b></span>
-        <span>مساوی: <b id="rps-draw">0</b></span>
+
+      <div class="user-area" id="userArea"></div>
+
+    </div>
+
+    <div class="hero">
+      <h2>رادار نسل جدید سرورهای Minecraft</h2>
+      <p>
+        سرورها را پیدا کن، وضعیتشان را بررسی کن، پلیرهای آنلاین را ببین،
+        IP را کپی کن و سرور محبوبت را به صدر جدول برسان.
+      </p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="number" id="stat-total">۰</div>
+        <div class="label">کل سرورها</div>
+      </div>
+
+      <div class="stat">
+        <div class="number" id="stat-iran">۰</div>
+        <div class="label">سرور ایرانی</div>
+      </div>
+
+      <div class="stat">
+        <div class="number" id="stat-foreign">۰</div>
+        <div class="label">سرور خارجی</div>
+      </div>
+
+      <div class="stat">
+        <div class="number" id="stat-online">۰/۰</div>
+        <div class="label">بررسی آنلاین</div>
       </div>
     </div>
 
-    <div class="game-card">
-      <h3>حدس عدد</h3>
-      <div class="sub">یه عدد بین ۱ تا ۱۰۰ حدس بزن</div>
-      <input type="number" class="guess-input" id="guess-input" placeholder="؟" min="1" max="100">
-      <br>
-      <button class="wide-btn" style="background:var(--diamond);color:#06302c;" id="guess-submit">حدس بزن</button>
-      <div class="guess-out" id="guess-msg">آماده‌ای؟</div>
-      <div class="guess-tries" id="guess-tries"></div>
-      <br>
-      <button class="wide-btn" style="background:var(--panel-lt);" id="guess-restart">🔁 بازی جدید</button>
-    </div>
   </div>
+</header>
+
+<!-- ================= NAV ================= -->
+
+<div class="tabs-wrap">
+  <nav class="tabs">
+
+    <button class="tab active" data-tab="iran">
+      🇮🇷 سرورهای ایرانی
+    </button>
+
+    <button class="tab" data-tab="foreign">
+      🌍 سرورهای خارجی
+    </button>
+
+    <button class="tab" data-tab="top">
+      🏆 برترین سرورها
+    </button>
+
+    <button class="tab" data-tab="scoreboard">
+      📊 اسکوربورد
+    </button>
+
+  </nav>
 </div>
+
+<!-- ================= CONTENT ================= -->
+
+<main class="container">
+
+  <!-- IRAN -->
+
+  <section class="section active" id="sec-iran">
+
+    <div class="toolbar">
+
+      <div class="search-row">
+        <input
+          class="search"
+          id="search-iran"
+          placeholder="🔎 جستجوی سرور ایرانی..."
+        >
+
+        <button class="refresh" id="refreshIran" title="بازسازی">
+          ↻
+        </button>
+      </div>
+
+      <div class="filters">
+
+        <div class="chips" id="filter-iran">
+          <button class="chip active" data-val="all">همه</button>
+          <button class="chip" data-val="java">Java</button>
+          <button class="chip" data-val="bedrock">Bedrock</button>
+        </div>
+
+        <button class="check-all" id="checkall-iran">
+          📡 بررسی همه
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="server-grid" id="list-iran"></div>
+
+  </section>
+
+  <!-- FOREIGN -->
+
+  <section class="section" id="sec-foreign">
+
+    <div class="toolbar">
+
+      <div class="search-row">
+        <input
+          class="search"
+          id="search-foreign"
+          placeholder="🔎 جستجوی سرور خارجی..."
+        >
+
+        <button class="refresh" id="refreshForeign">
+          ↻
+        </button>
+      </div>
+
+      <div class="filters">
+
+        <div class="chips" id="filter-foreign">
+          <button class="chip active" data-val="all">همه</button>
+          <button class="chip" data-val="cracked">کرک</button>
+          <button class="chip" data-val="premium">پرمیوم</button>
+        </div>
+
+        <button class="check-all" id="checkall-foreign">
+          📡 بررسی همه
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="server-grid" id="list-foreign"></div>
+
+  </section>
+
+  <!-- TOP -->
+
+  <section class="section" id="sec-top">
+
+    <div class="top-hero">
+      <h2>🏆 تالار مشاهیر CraftRadar</h2>
+      <p>
+        محبوب‌ترین سرورها بر اساس رأی کاربران
+      </p>
+    </div>
+
+    <div class="ranking" id="list-top"></div>
+
+  </section>
+
+  <!-- SCOREBOARD -->
+
+  <section class="section" id="sec-scoreboard">
+
+    <div class="scoreboard-layout">
+
+      <div class="score-selector">
+
+        <h2>📊 ساخت اسکوربورد</h2>
+
+        <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:13px">
+          یک سرور انتخاب کن تا اطلاعات قابل دریافت آن را به شکل
+          Minecraft Scoreboard ببینی.
+        </p>
+
+        <select class="server-select" id="scoreServer">
+          <option value="">انتخاب سرور...</option>
+        </select>
+
+        <button
+          class="copy-score"
+          id="copyScore"
+          style="margin-top:12px"
+        >
+          📋 کپی اسکوربورد
+        </button>
+
+      </div>
+
+      <div class="scoreboard" id="scoreboard">
+
+        <div class="scoreboard-header">
+          CRAFT RADAR
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">Server</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">Status</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">Players</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">Version</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">IP</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-line">
+          <span class="score-key">Port</span>
+          <span class="score-value">---</span>
+        </div>
+
+        <div class="score-motd">
+          برای دریافت اطلاعات، یک سرور را انتخاب و وضعیت آن را بررسی کن.
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+
+  <footer class="footer">
+
+    <div class="footer-logo">
+      ⚡ CraftRadar
+    </div>
+
+    <p>
+      رادار هوشمند سرورهای Minecraft<br>
+      پیدا کن • بررسی کن • بازی کن
+    </p>
+
+    <div class="pixel">
+      CRAFT • BUILD • SURVIVE
+    </div>
+
+  </footer>
+
+</main>
+
+<!-- ================= TOAST ================= -->
 
 <div class="toast" id="toast"></div>
-<div id="boot-error-holder"></div>
+
+<!-- ================= LOGIN ================= -->
+
+<div class="modal" id="loginModal">
+
+  <div class="modal-box">
+
+    <button class="close" id="closeLogin">×</button>
+
+    <div class="modal-title">
+      ورود به CraftRadar
+    </div>
+
+    <div class="modal-sub">
+      برای رأی دادن وارد حساب خود شوید
+    </div>
+
+    <form id="loginForm">
+
+      <input
+        class="login-input"
+        type="email"
+        id="email"
+        placeholder="ایمیل"
+        required
+      >
+
+      <input
+        class="login-input"
+        type="password"
+        id="password"
+        placeholder="رمز عبور"
+        required
+      >
+
+      <button class="login-submit">
+        ورود / ثبت‌نام
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- ================= SERVER DETAIL ================= -->
+
+<div class="modal" id="detailModal">
+
+  <div class="modal-box">
+
+    <button class="close" id="closeDetail">×</button>
+
+    <img class="detail-logo" id="detailLogo">
+
+    <div class="modal-title" id="detailName">
+      Server
+    </div>
+
+    <div class="modal-sub" id="detailSub">
+      Server information
+    </div>
+
+    <div class="detail-grid" id="detailGrid"></div>
+
+  </div>
+
+</div>
 
 <script>
-try {
+(function(){
 
-var SERVERS = {
+"use strict";
+
+/* =========================================================
+   SERVER DATABASE
+========================================================= */
+
+const SERVERS = {
+
   iran: [
-    { name: "GunMax", ip: "play.gunmax.org", mode: "Survival, Roleplay, SkyMine, BedWars" },
-    { name: "GameUp", ip: "mc.gameup.ir", mode: "Survival, SkyBlock, BedWars, Creative, Economy, Factions" },
-    { name: "Xcraft", ip: "play.xcraft.ir", mode: "Survival, SMP, SkyBlock, Practice, Parkour, SkyMine, Creative, BedWars" },
-    { name: "RexoCraft", ip: "play.rexocraft.com", mode: "BedWars, Survival, SkyMine, SkyBlock, ThePit, Arcade" },
-    { name: "Iran Minecraft", ip: "play.iranminecraft.com", mode: "Survival, SkyBlock, BedWars, Hunger Games, Minigames" },
-    { name: "TrexMine", ip: "play.trexmine.com", mode: "Survival, SkyBlock, BedWars, PvP, Minigames" },
-    { name: "MagicPixel", ip: "play.magicpixel.ir", mode: "Roleplay, RPG, SkyMine, SMP" },
-    { name: "InfinityStar", ip: "play.infinitystar.ir", mode: "Roleplay, Survival, SMP" },
-    { name: "HorizonNetwork", ip: "play.horizonnetwork.ir", mode: "SkyMine, SMP, ThePit, Survival" },
-    { name: "St Abad", ip: "play.stabad.ir", mode: "Survival, Practice" },
-    { name: "LunarProCraft", ip: "play.lunarprocraft.ir", mode: "OneBlock, Minigames, BedWars" },
-    { name: "ArianCraft", ip: "play.svariancraft.ir", mode: "BedWars, OneBlock, SkyBlock, Survival, Practice, Parkour" },
-    { name: "SUSIS MC", ip: "play.susismc.ir", mode: "Survival, SMP, Anarchy, Zombie" },
-    { name: "MineShard", ip: "mc.mineshard.top", mode: "PracticePvP, Bridge Training" },
-    { name: "OnyxMine", ip: "play.onyx-mc.ir", mode: "Survival و حالت‌های مختلف" },
-    { name: "VoidShot", ip: "play.voidshot.ir", mode: "Roleplay, BedWars, SkyBlock, Survival" },
-    { name: "PaladinGuard", ip: "java.paladinguard.ir", mode: "Survival, Roleplay, SMP, Bedrock" },
-    { name: "PandaSMP", ip: "play.pandasmp.ir", mode: "Lifesteal, SMP, Anarchy" },
-    { name: "ColdGame", ip: "play.coldgame.ir", mode: "Survival, SlimeFun, SkyMine, Practice" },
-    { name: "BitCraft", ip: "play.bitonetop.com", mode: "Survival, PvP, Economy" },
-    { name: "RubyLand", ip: "play.mcbe.ir", mode: "Bedrock Survival, Economy, Roleplay" }
+
+    {
+      name:"GunMax",
+      ip:"play.gunmax.org",
+      type:"java",
+      modes:"Survival, Roleplay, SkyMine, BedWars"
+    },
+
+    {
+      name:"GameUp",
+      ip:"mc.gameup.ir",
+      type:"java",
+      modes:"Survival, SkyBlock, BedWars, Creative, Economy, Factions"
+    },
+
+    {
+      name:"Xcraft",
+      ip:"play.xcraft.ir",
+      type:"java",
+      modes:"Survival, SMP, SkyBlock, Practice, Parkour, SkyMine, Creative, BedWars"
+    },
+
+    {
+      name:"RexoCraft",
+      ip:"play.rexocraft.com",
+      type:"java",
+      modes:"BedWars, Survival, SkyMine, SkyBlock, ThePit, Arcade"
+    },
+
+    {
+      name:"TrexMine",
+      ip:"play.trexmine.com",
+      type:"java",
+      modes:"Survival, SkyBlock, BedWars, PvP, Minigames"
+    },
+
+    {
+      name:"MagicPixel",
+      ip:"play.magicpixel.ir",
+      type:"java",
+      modes:"Roleplay, RPG, SkyMine, SMP"
+    },
+
+    {
+      name:"InfinityStar",
+      ip:"play.infinitystar.ir",
+      type:"java",
+      modes:"Roleplay, Survival, SMP"
+    },
+
+    {
+      name:"HorizonNetwork",
+      ip:"play.horizonnetwork.ir",
+      type:"java",
+      modes:"SkyMine, SMP, ThePit, Survival"
+    },
+
+    {
+      name:"LunarProCraft",
+      ip:"play.lunarprocraft.ir",
+      type:"java",
+      modes:"OneBlock, Minigames, BedWars"
+    },
+
+    {
+      name:"ArianCraft",
+      ip:"play.svariancraft.ir",
+      type:"java",
+      modes:"BedWars, OneBlock, SkyBlock, Survival, Practice, Parkour"
+    },
+
+    {
+      name:"SUSIS MC",
+      ip:"play.susismc.ir",
+      type:"java",
+      modes:"Survival, SMP, Anarchy, Zombie"
+    },
+
+    {
+      name:"VoidShot",
+      ip:"play.voidshot.ir",
+      type:"java",
+      modes:"Roleplay, BedWars, SkyBlock, Survival"
+    },
+
+    {
+      name:"PaladinGuard",
+      ip:"java.paladinguard.ir",
+      type:"both",
+      modes:"Survival, Roleplay, SMP, Bedrock"
+    },
+
+    {
+      name:"PandaSMP",
+      ip:"play.pandasmp.ir",
+      type:"java",
+      modes:"Lifesteal, SMP, Anarchy"
+    },
+
+    {
+      name:"ColdGame",
+      ip:"play.coldgame.ir",
+      type:"java",
+      modes:"Survival, SlimeFun, SkyMine, Practice"
+    },
+
+    {
+      name:"RubyLand",
+      ip:"play.mcbe.ir",
+      type:"bedrock",
+      modes:"Bedrock Survival, Economy, Roleplay"
+    }
+
   ],
+
   foreign: [
-    { name: "Pika Network", ip: "play.pika-network.net", mode: "BedWars, SkyBlock, Factions, Lifesteal, Prison, Survival, OneBlock, KitPvP", status: "Cracked" },
-    { name: "JartexNetwork", ip: "play.jartexnetwork.com", mode: "BedWars, SkyWars, Survival, Prison, SkyBlock, Factions, PvP", status: "Cracked" },
-    { name: "MineBerry", ip: "mc.mineberry.org", mode: "Survival, Anarchy, Economy, Factions, KitPvP, Minigames, PvP", status: "Cracked" },
-    { name: "HylexMC", ip: "play.hylexmc.net", mode: "BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
-    { name: "Twerion", ip: "twerion.net", mode: "BedWars, SkyBlock, PvP, Minigames, CityBuild", status: "Cracked" },
-    { name: "AppleMC", ip: "play.applemc.fun", mode: "Survival, BedWars, Earth, Lifesteal, Economy, PvP", status: "Cracked" },
-    { name: "UltimisMC", ip: "play.ultimismc.com", mode: "Survival, BedWars, Lifesteal, OneBlock, Parkour, PvP", status: "Cracked" },
-    { name: "LifestealSMP", ip: "play.lifestealsmp.com", mode: "Survival, Lifesteal, Earth, Factions, PvP, Minigames", status: "Cracked" },
-    { name: "6b6t", ip: "play.6b6t.org", mode: "Anarchy, Survival, PvP", status: "Cracked" },
-    { name: "OneBlocky", ip: "play.oneblocky.com", mode: "OneBlock, SkyBlock, Survival, Economy, PvP", status: "Cracked" }
+
+    {
+      name:"Hypixel",
+      ip:"mc.hypixel.net",
+      type:"java",
+      access:"premium",
+      modes:"BedWars, SkyBlock, SkyWars, Murder Mystery"
+    },
+
+    {
+      name:"Wynncraft",
+      ip:"play.wynncraft.com",
+      type:"java",
+      access:"premium",
+      modes:"MMORPG, Quest, Level up"
+    },
+
+    {
+      name:"CubeCraft Games",
+      ip:"play.cubecraft.net",
+      type:"both",
+      access:"premium",
+      modes:"SkyWars, EggWars, Lucky Islands"
+    },
+
+    {
+      name:"Purple Prison",
+      ip:"play.purpleprison.org",
+      type:"java",
+      access:"cracked",
+      modes:"Prison, Economy, Mining"
+    },
+
+    {
+      name:"6b6t",
+      ip:"play.6b6t.org",
+      type:"java",
+      access:"cracked",
+      modes:"Anarchy, Survival, PvP"
+    },
+
+    {
+      name:"Pika Network",
+      ip:"play.pika-network.net",
+      type:"both",
+      access:"cracked",
+      modes:"BedWars, SkyBlock, Factions, Lifesteal, Prison"
+    },
+
+    {
+      name:"JartexNetwork",
+      ip:"play.jartexnetwork.com",
+      type:"java",
+      access:"cracked",
+      modes:"BedWars, SkyWars, Survival, Prison, SkyBlock"
+    },
+
+    {
+      name:"MineBerry",
+      ip:"mc.mineberry.org",
+      type:"java",
+      access:"cracked",
+      modes:"Survival, Anarchy, Economy, Factions, KitPvP"
+    },
+
+    {
+      name:"HylexMC",
+      ip:"play.hylexmc.net",
+      type:"java",
+      access:"cracked",
+      modes:"BedWars, Lifesteal, OneBlock, Parkour, PvP"
+    },
+
+    {
+      name:"Twerion",
+      ip:"twerion.net",
+      type:"java",
+      access:"cracked",
+      modes:"BedWars, SkyBlock, PvP, Minigames, CityBuild"
+    },
+
+    {
+      name:"AppleMC",
+      ip:"play.applemc.fun",
+      type:"java",
+      access:"cracked",
+      modes:"Survival, BedWars, Earth, Lifesteal, Economy"
+    },
+
+    {
+      name:"UltimisMC",
+      ip:"play.ultimismc.com",
+      type:"java",
+      access:"cracked",
+      modes:"Survival, BedWars, Lifesteal, OneBlock, Parkour"
+    },
+
+    {
+      name:"LifestealSMP",
+      ip:"play.lifestealsmp.com",
+      type:"java",
+      access:"cracked",
+      modes:"Survival, Lifesteal, Earth, Factions, PvP"
+    },
+
+    {
+      name:"OneBlocky",
+      ip:"play.oneblocky.com",
+      type:"java",
+      access:"cracked",
+      modes:"OneBlock, SkyBlock, Survival, Economy"
+    }
+
   ]
+
 };
 
-var AVATAR_COLORS = ["#5d9c3f", "#57d8d0", "#f0b92d", "#d94a34", "#7a4a26", "#5b7fd9"];
-function avatarStyle(name) {
-  var sum = 0;
-  for (var i = 0; i < name.length; i++) sum += name.charCodeAt(i);
-  var color = AVATAR_COLORS[sum % AVATAR_COLORS.length];
-  var letters = name.replace(/[^A-Za-z\u0600-\u06FF]/g, "").slice(0, 2).toUpperCase() || "MC";
-  return { color: color, letters: letters };
-}
 
-/* ---------- رأی‌ها (localStorage) ---------- */
-function safeGet(key, fallback) {
-  try {
-    var v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch (e) { return fallback; }
-}
-function safeSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
-}
+/* =========================================================
+   STATE
+========================================================= */
 
-var votes = safeGet("craftradar_votes", {});
-var votedServers = safeGet("craftradar_voted", []);
+let currentUser = null;
+let votes = {};
+let myVotes = [];
+let serverCache = {};
 
-function getVotes(name) { return votes[name] || 0; }
-function hasVoted(name) { return votedServers.indexOf(name) !== -1; }
-function addVote(name) {
-  if (hasVoted(name)) return null;
-  votes[name] = (votes[name] || 0) + 1;
-  safeSet("craftradar_votes", votes);
-  votedServers.push(name);
-  safeSet("craftradar_voted", votedServers);
-  return votes[name];
-}
+let onlineStat = {
+  online:0,
+  checked:0
+};
 
-/* ---------- توست ---------- */
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  setTimeout(function () { t.style.display = "none"; }, 1300);
-}
-function copyIp(ip) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(ip).catch(function () {});
+const state = {
+  iran:{
+    search:"",
+    filter:"all"
+  },
+  foreign:{
+    search:"",
+    filter:"all"
   }
-  showToast("کپی شد: " + ip);
+};
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function faNumber(value){
+
+  return String(value)
+    .replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+
 }
 
-/* ---------- وضعیت زنده ---------- */
-function checkStatus(ip, outEl, btn) {
-  outEl.style.display = "block";
-  outEl.textContent = "در حال بررسی...";
-  btn.disabled = true;
-  var cleanIp = ip.split("/")[0].trim();
 
-  fetch("https://api.mcsrvstat.us/3/" + cleanIp)
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (data.online) {
-        outEl.textContent =
-          "🟢 آنلاین (Java)\n" +
-          "🌐 IP عددی: " + (data.ip || "?") + "\n" +
-          "👥 پلیر: " + (data.players ? data.players.online : "?") + "/" + (data.players ? data.players.max : "?") + "\n" +
-          "🧱 نسخه: " + (data.version || "?");
-        btn.disabled = false;
-        return;
-      }
-      return fetch("https://api.mcsrvstat.us/bedrock/3/" + cleanIp)
-        .then(function (r) { return r.json(); })
-        .then(function (data2) {
-          if (data2.online) {
-            outEl.textContent =
-              "🟢 آنلاین (Bedrock)\n" +
-              "🌐 IP عددی: " + (data2.ip || "?") + "\n" +
-              "👥 پلیر: " + (data2.players ? data2.players.online : "?") + "/" + (data2.players ? data2.players.max : "?");
-          } else {
-            outEl.textContent = "🔴 آفلاین یا در دسترس نیست";
-          }
-          btn.disabled = false;
-        });
-    })
-    .catch(function () {
-      outEl.textContent = "⚠️ خطا در بررسی وضعیت (اتصال اینترنت رو چک کن)";
-      btn.disabled = false;
-    });
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
 }
 
-/* ---------- رندر لیست ---------- */
-function renderList(category, containerId) {
-  var list = document.getElementById(containerId);
-  list.innerHTML = "";
-  SERVERS[category].forEach(function (s) {
-    var av = avatarStyle(s.name);
-    var card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML =
-      '<div class="card-head">' +
-        '<div class="avatar" style="background:' + av.color + '">' + av.letters + '</div>' +
-        '<div class="card-titles">' +
-          '<div class="name">' + s.name + '</div>' +
-          '<div class="badge-row">' +
-            (s.status ? '<span class="badge cracked">' + s.status + '</span>' : '') +
-            '<span class="badge votes votes-badge">🗳️ ' + getVotes(s.name) + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="ip-line"><span>' + s.ip + '</span><span class="hint">کپی</span></div>' +
-      '<div class="modes">' + s.mode + '</div>' +
-      '<div class="btn-row">' +
-        '<button class="btn status-btn">📡 وضعیت</button>' +
-        '<button class="btn vote-btn">🗳️ رأی</button>' +
-      '</div>' +
-      '<div class="status-box"></div>';
 
-    card.querySelector(".ip-line").onclick = function () { copyIp(s.ip); };
+function typeLabel(type){
 
-    var statusBtn = card.querySelector(".status-btn");
-    var outEl = card.querySelector(".status-box");
-    statusBtn.onclick = function () { checkStatus(s.ip, outEl, statusBtn); };
+  if(type==="java") return "Java";
+  if(type==="bedrock") return "Bedrock";
+  return "Java + Bedrock";
 
-    var voteBtn = card.querySelector(".vote-btn");
-    var votesBadge = card.querySelector(".votes-badge");
-    if (hasVoted(s.name)) {
-      voteBtn.textContent = "✅ رأی دادی";
-      voteBtn.disabled = true;
+}
+
+
+function iconURL(ip){
+
+  return "https://api.mcstatus.io/v2/icon/"+encodeURIComponent(ip);
+
+}
+
+
+function fallbackIcon(name){
+
+  const letter = encodeURIComponent(
+    name.replace(/[^A-Za-z0-9]/g,"").slice(0,2).toUpperCase() || "MC"
+  );
+
+  return "https://ui-avatars.com/api/?name="+letter+
+         "&background=07100d&color=00e8ff&size=128&bold=true";
+
+}
+
+
+function serverKey(server){
+
+  return server.name;
+
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function loadStorage(){
+
+  try{
+
+    const user = localStorage.getItem("cr_user");
+
+    if(user){
+      currentUser = JSON.parse(user);
     }
-    voteBtn.onclick = function () {
-      var newTotal = addVote(s.name);
-      if (newTotal === null) {
-        showToast("قبلاً به " + s.name + " رأی دادی");
-        return;
-      }
-      votesBadge.textContent = "🗳️ " + newTotal;
-      voteBtn.textContent = "✅ رأی دادی";
-      voteBtn.disabled = true;
-      showToast("به " + s.name + " رأی دادی!");
+
+  }catch(e){}
+
+  try{
+
+    const savedVotes = localStorage.getItem("cr_votes");
+
+    if(savedVotes){
+      votes = JSON.parse(savedVotes);
+    }
+
+  }catch(e){}
+
+  try{
+
+    const savedMyVotes = localStorage.getItem("cr_myvotes");
+
+    if(savedMyVotes){
+      myVotes = JSON.parse(savedMyVotes);
+    }
+
+  }catch(e){}
+
+}
+
+
+function saveUser(){
+
+  localStorage.setItem(
+    "cr_user",
+    JSON.stringify(currentUser)
+  );
+
+}
+
+
+function saveVotes(){
+
+  localStorage.setItem(
+    "cr_votes",
+    JSON.stringify(votes)
+  );
+
+}
+
+
+function saveMyVotes(){
+
+  localStorage.setItem(
+    "cr_myvotes",
+    JSON.stringify(myVotes)
+  );
+
+}
+
+
+function getVotes(server){
+
+  return votes[serverKey(server)] || 0;
+
+}
+
+
+function hasVoted(server){
+
+  return myVotes.includes(serverKey(server));
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(message){
+
+  const element = document.getElementById("toast");
+
+  element.textContent = message;
+
+  element.classList.add("show");
+
+  clearTimeout(element._timer);
+
+  element._timer = setTimeout(
+    ()=>element.classList.remove("show"),
+    2200
+  );
+
+}
+
+
+/* =========================================================
+   COPY
+========================================================= */
+
+async function copyText(text){
+
+  try{
+
+    await navigator.clipboard.writeText(text);
+
+  }catch(e){
+
+    const area = document.createElement("textarea");
+
+    area.value = text;
+
+    document.body.appendChild(area);
+
+    area.select();
+
+    document.execCommand("copy");
+
+    area.remove();
+
+  }
+
+  toast("📋 کپی شد");
+
+}
+
+
+function copyIP(server){
+
+  copyText(server.ip);
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function openLogin(){
+
+  document
+    .getElementById("loginModal")
+    .classList.add("show");
+
+}
+
+
+function closeLogin(){
+
+  document
+    .getElementById("loginModal")
+    .classList.remove("show");
+
+}
+
+
+function updateUserArea(){
+
+  const area = document.getElementById("userArea");
+
+  if(currentUser){
+
+    const name =
+      currentUser.name ||
+      currentUser.email.split("@")[0];
+
+    area.innerHTML =
+
+      `<span class="user-badge">
+        👤 ${escapeHTML(name)}
+      </span>
+
+      <button class="btn-logout" id="logoutBtn">
+        خروج
+      </button>`;
+
+    document
+      .getElementById("logoutBtn")
+      .onclick = function(){
+
+        currentUser = null;
+
+        localStorage.removeItem("cr_user");
+
+        updateUserArea();
+
+        toast("از حساب خارج شدید");
+
+        renderAll();
+
+      };
+
+  }else{
+
+    area.innerHTML =
+      `<button class="btn-login" id="openLogin">
+        ورود / ثبت‌نام
+      </button>`;
+
+    document
+      .getElementById("openLogin")
+      .onclick = openLogin;
+
+  }
+
+}
+
+
+document
+  .getElementById("closeLogin")
+  .onclick = closeLogin;
+
+
+document
+  .getElementById("loginModal")
+  .onclick = function(e){
+
+    if(e.target===this){
+      closeLogin();
+    }
+
+  };
+
+
+document
+  .getElementById("loginForm")
+  .onsubmit = function(e){
+
+    e.preventDefault();
+
+    const email =
+      document.getElementById("email")
+        .value
+        .trim();
+
+    const password =
+      document.getElementById("password").value;
+
+    if(!email || !password){
+
+      toast("ایمیل و رمز را وارد کنید");
+
+      return;
+
+    }
+
+    currentUser = {
+
+      email:email,
+
+      name:email.split("@")[0]
+
     };
 
-    list.appendChild(card);
-  });
-}
+    saveUser();
 
-function renderTop() {
-  var all = SERVERS.iran.concat(SERVERS.foreign);
-  var sorted = all.slice().sort(function (a, b) { return getVotes(b.name) - getVotes(a.name); });
-  var list = document.getElementById("list-top");
-  list.innerHTML = "";
+    closeLogin();
 
-  var anyVotes = sorted.some(function (s) { return getVotes(s.name) > 0; });
-  if (!anyVotes) {
-    list.innerHTML = '<div class="empty-note">هنوز کسی رأی نداده! برو تو تب سرورها و اولین نفر باش 🚀</div>';
-    return;
-  }
-  sorted.slice(0, 10).forEach(function (s, i) {
-    var row = document.createElement("div");
-    row.className = "rank-row";
-    row.innerHTML =
-      '<div class="rank-num">' + (i + 1) + '</div>' +
-      '<div class="name">' + s.name + '</div>' +
-      '<div class="count">🗳️ ' + getVotes(s.name) + ' رأی</div>';
-    list.appendChild(row);
-  });
-}
+    updateUserArea();
 
-/* ---------- تب‌ها ---------- */
-var tabs = document.querySelectorAll(".tab");
-for (var i = 0; i < tabs.length; i++) {
-  tabs[i].onclick = function () {
-    var target = this.getAttribute("data-tab");
-    var allTabs = document.querySelectorAll(".tab");
-    for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove("active");
-    var allSections = document.querySelectorAll(".section");
-    for (var k = 0; k < allSections.length; k++) allSections[k].classList.remove("active");
-    this.classList.add("active");
-    document.getElementById("sec-" + target).classList.add("active");
-    if (target === "top") renderTop();
+    toast("خوش آمدید "+currentUser.name);
+
+    renderAll();
+
   };
+
+
+/* =========================================================
+   VOTE
+========================================================= */
+
+function voteServer(server){
+
+  if(!currentUser){
+
+    toast("برای رأی دادن ابتدا وارد شوید");
+
+    openLogin();
+
+    return;
+
+  }
+
+  if(hasVoted(server)){
+
+    toast("قبلاً به این سرور رأی داده‌اید");
+
+    return;
+
+  }
+
+  const key = serverKey(server);
+
+  votes[key] = (votes[key] || 0) + 1;
+
+  myVotes.push(key);
+
+  saveVotes();
+
+  saveMyVotes();
+
+  toast("🗳️ رأی شما ثبت شد");
+
+  renderAll();
+
 }
 
-renderList("iran", "list-iran");
-renderList("foreign", "list-foreign");
 
-/* ---------- سنگ کاغذ قیچی ---------- */
-var rpsScore = safeGet("craftradar_rps", { win: 0, lose: 0, draw: 0 });
-function updateRpsUI() {
-  document.getElementById("rps-win").textContent = rpsScore.win;
-  document.getElementById("rps-lose").textContent = rpsScore.lose;
-  document.getEl
+/* =========================================================
+   API
+========================================================= */
+
+function fetchWithTimeout(url, timeout=8000){
+
+  const controller =
+    new AbortController();
+
+  const timer =
+    setTimeout(
+      ()=>controller.abort(),
+      timeout
+    );
+
+  return fetch(
+    url,
+    {
+      signal:controller.signal
+    }
+  ).finally(
+    ()=>clearTimeout(timer)
+  );
+
+}
+
+
+async function requestServer(server){
+
+  const clean =
+    server.ip
+      .split("/")[0]
+      .trim();
+
+  const endpoints = [];
+
+  if(server.type==="bedrock"){
+
+    endpoints.push(
+      "https://api.mcsrvstat.us/bedrock/3/"+clean
+    );
+
+  }else{
+
+    endpoints.push(
+      "https://api.mcsrvstat.us/3/"+clean
+    );
+
+    if(server.type==="both"){
+
+      endpoints.push(
+        "https://api.mcsrvstat.us/bedrock/3/"+clean
+      );
+
+    }
+
+  }
+
+  for(const endpoint of endpoints){
+
+    try{
+
+      const response =
+        await fetchWithTimeout(
+          endpoint,
+          8000
+        );
+
+      if(!response.ok) continue;
+
+      const data =
+        await response.json();
+
+      if(data && data.online){
+
+        return data;
+
+      }
+
+    }catch(e){}
+
+  }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+async function checkStatus(
+  server,
+  card,
+  autoOpen=true
+){
+
+  const statusPanel =
+    card.querySelector(".status-panel");
+
+  const statusDot =
+    card.querySelector(".status-indicator");
+
+  const statusBtn =
+    card.querySelector(".status-button");
+
+  statusPanel.classList.add("show");
+
+  statusPanel.innerHTML =
+    `<div class="status-row">
+      <span class="status-key">
+        <span class="status-indicator loading"></span>
+        در حال بررسی...
+      </span>
+    </div>`;
+
+  statusDot.className =
+    "status-indicator loading";
+
+  statusBtn.disabled = true;
+
+  const data =
+    await requestServer(server);
+
+  statusBtn.disabled = false;
+
+  if(!data){
+
+    statusDot.className =
+      "status-indicator offline";
+
+    statusPanel.innerHTML =
+      `<div class="status-row">
+        <span class="status-key">
+          🔴 آفلاین یا در دسترس نیست
+        </span>
+      </div>`;
+
+    updateOnline(false);
+
+    serverCache[serverKey(server)] = {
+      online:false,
+      server
+    };
+
+    return;
+
+  }
+
+  updateOnline(true);
+
+  serverCache[serverKey(server)] = {
+    online:true,
+    data:data,
+    server:server
+  };
+
+  statusDot.className =
+    "status-indicator online";
+
+  const players =
+    data.players &&
+    data.players.online !== undefined
+      ? data.players.online+
+        " / "+
+        (data.players.max ?? "?")
+      : "?";
+
+  const version =
+    typeof data.version==="string"
+      ? data.version
+      : data.version?.name || "?";
+
+  const port =
+    data.port || "25565";
+
+  const detectedIP =
+    data.ip || server.ip;
+
+  statusPanel.innerHTML =
+
+    `<div class="status-row">
+      <span class="status-key">🟢 وضعیت</span>
+      <span class="status-value">ONLINE</span>
+    </div>
+
+    <div class="status-row">
+      <span class="status-key">👥 پلیر</span>
+      <span class="status-value">${escapeHTML(players)}</span>
+    </div>
+
+    <div class="status-row">
+      <span class="status-key">🌐 IP</span>
+      <span class="status-value">${escapeHTML(detectedIP)}</span>
+    </div>
+
+    <div class="status-row">
+      <span class="status-key">🔌 Port</span>
+      <span class="status-value">${escapeHTML(port)}</span>
+    </div>
+
+    <div class="status-row">
+      <span class="status-key">⚙ Version</span>
+      <span class="status-value">${escapeHTML(version)}</span>
+    </div>`;
+
+  updatePlayersPanel(server,card,data);
+
+  updateScoreboardIfSelected(server,data);
+
+}
+
+
+/* =========================================================
+   ONLINE STAT
+========================================================= */
+
+function resetOnlineStat(){
+
+  onlineStat = {
+    online:0,
+    checked:0
+  };
+
+  paintOnlineStat();
+
+}
+
+
+function updateOnline(isOnline){
+
+  onlineStat.checked++;
+
+  if(isOnline){
+    onlineStat.online++;
+  }
+
+  paintOnlineStat();
+
+}
+
+
+function paintOnlineStat(){
+
+  document.getElementById("stat-online")
+    .textContent =
+      faNumber(onlineStat.online)+
+      "/"+
+      faNumber(onlineStat.checked);
+
+}
+
+
+/* =========================================================
+   PLAYERS
+========================================================= */
+
+function updatePlayersPanel(
+  server,
+  card,
+  data
+){
+
+  const panel =
+    card.querySelector(".players-panel");
+
+  const list =
+    data.players?.list || [];
+
+  if(!list.length){
+
+    panel.innerHTML =
+      `<div class="players-title">
+        👥 بازیکنان آنلاین
+      </div>
+      <div style="font-size:11px;color:var(--muted)">
+        لیست پلیرها توسط این سرور ارائه نشده است.
+      </div>`;
+
+    panel.classList.add("show");
+
+    return;
+
+  }
+
+  panel.classList.add("show");
+
+  panel.innerHTML =
+
+    `<div class="players-title">
+
+      <span>
+        👥 پلیرها (${faNumber(list.length)})
+      </span>
+
+      <button
+        class="copy-all"
+        data-copy-all
+      >
+        📋 کپی همه
+      </button>
+
+    </div>
+
+    <div class="players-list">
+
+      ${list.map(player =>
+
+        `<span
+          class="player"
+          data-player="${escapeHTML(player)}"
+        >
+          ${escapeHTML(player)}
+        </span>`
+
+      ).join("")}
+
+    </div>`;
+
+  panel
+    .querySelector("[data-copy-all]")
+    .onclick = ()=>copyText(list.join("\n"));
+
+  panel
+    .querySelectorAll("[data-player]")
+    .forEach(element=>{
+
+      element.onclick = ()=>
+        copyText(
+          element.dataset.player
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   SERVER DETAILS
+========================================================= */
+
+function openDetails(server){
+
+  const modal =
+    document.getElementById("detailModal");
+
+  const cache =
+    serverCache[serverKey(server)];
+
+  const data =
+    cache?.data || {};
+
+  document.getElementById("detailLogo")
+    .src =
+      iconURL(server.ip);
+
+  document.getElementById("detailLogo")
+    .onerror =
+      function(){
+        this.src=fallbackIcon(server.name);
+      };
+
+  document.getElementById("detailName")
+    .textContent =
+      server.name;
+
+  document.getElementById("detailSub")
+    .textContent =
+      server.ip;
+
+  const players =
+    data.players?.online !== undefined
+      ? `${data.players.online} / ${data.players.max ?? "?"}`
+      : "بررسی نشده";
+
+  const version =
+    typeof data.version==="string"
+      ? data.version
+      : data.version?.name || "بررسی نشده";
+
+  const software =
+    data.software || "نامشخص";
+
+  const motd =
+    data.motd?.clean
+      ? Array.isArray(data.motd.clean)
+        ? data.motd.clean.join(" ")
+        : data.motd.clean
+      : "نامشخص";
+
+  document.getElementById("detailGrid")
+    .innerHTML =
+
+    `<div class="detail-item">
+      <small>IP</small>
+      <strong>${escapeHTML(data.ip || server.ip)}</strong>
+    </div>
+
+    <div class="detail-item">
+      <small>Port</small>
+      <strong>${escapeHTML(data.port || "25565")}</strong>
+    </div>
+
+    <div class="detail-item">
+      <small>Players</small>
+      <strong>${escapeHTML(players)}</strong>
+    </div>
+
+    <div class="detail-item">
+      <small>Version</small>
+      <strong>${escapeHTML(version)}</strong>
+    </div>
+
+    <div class="detail-item">
+      <small>Software</small>
+      <strong>${escapeHTML(software)}</strong>
+    </div>
+
+    <div class="detail-item">
+      <small>Type</small>
+      <strong>${escapeHTML(typeLabel(server.type))}</strong>
+    </div>
+
+    <div class="detail-item" style="grid-column:1/-1">
+      <small>MOTD</small>
+      <strong style="direction:rtl;text-align:right">
+        ${escapeHTML(motd)}
+      </strong>
+    </div>`;
+
+  modal.classList.add("show");
+
+}
+
+
+document
+  .getElementById("closeDetail")
+  .onclick = function(){
+
+    document
+      .getElementById("detailModal")
+      .classList.remove("show");
+
+  };
+
+
+document
+  .getElementById("detailModal")
+  .onclick = function(e){
+
+    if(e.target===this){
+
+      this.classList.remove("show");
+
+    }
+
+  };
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+function createCard(cat,server){
+
+  const card =
+    document.createElement("article");
+
+  card.className =
+    "server-card";
+
+  const voted =
+    hasVoted(server);
+
+  const accessBadge =
+    server.access==="cracked"
+
+      ? `<span class="badge badge-cracked">کرک</span>`
+
+      : server.access==="premium"
+
+        ? `<span class="badge badge-premium">پرمیوم</span>`
+
+        : "";
+
+  const typeBadge =
+    server.type==="bedrock"
+
+      ? `<span class="badge badge-bedrock">Bedrock</span>`
+
+      : server.type==="java"
+
+        ? `<span class="badge badge-java">Java</span>`
+
+        : `<span class="badge badge-java">Java + Bedrock</span>`;
+
+  card.innerHTML =
+
+    `<div class="server-head">
+
+      <img
+        class="server-logo"
+        src="${iconURL(server.ip)}"
+        alt="${escapeHTML(server.name)}"
+      >
+
+      <div class="server-title">
+
+        <div class="server-name">
+          ${escapeHTML(server.name)}
+        </div>
+
+        <div class="server-badges">
+
+          ${typeBadge}
+
+          ${accessBadge}
+
+          <span class="badge badge-votes">
+            🗳️ ${faNumber(getVotes(server))}
+          </span>
+
+        </div>
+
+      </div>
+
+      <span class="status-indicator"></span>
+
+    </div>
+
+    <div class="ip-box">
+
+      <span>${escapeHTML(server.ip)}</span>
+
+      <span class="ip-copy">📋 کپی</span>
+
+    </div>
+
+    <div class="server-modes">
+      🎮 ${escapeHTML(server.modes)}
+    </div>
+
+    <div class="quick-info">
+
+      <span class="quick">
+        ⚡ وضعیت زنده
+      </span>
+
+      <span class="quick">
+        👥 پلیرها
+      </span>
+
+      <span class="quick">
+        📊 اطلاعات
+      </span>
+
+    </div>
+
+    <div class="card-buttons">
+
+      <button class="action-btn status-button">
+        📡 وضعیت
+      </button>
+
+      <button class="action-btn players-button">
+        👥 پلیرها
+      </button>
+
+      <button class="action-btn detail-button">
+        📋 اطلاعات
+      </button>
+
+      <button
+        class="action-btn vote"
+        ${voted ? "disabled" : ""}
+      >
+        ${voted ? "✅ رأی دادید" : "🗳️ رأی"}
+      </button>
+
+    </div>
+
+    <div class="status-panel"></div>
+
+    <div class="players-panel"></div>`;
+
+  const logo =
+    card.querySelector(".server-logo");
+
+  logo.onerror =
+    function(){
+
+      this.onerror=null;
+
+      this.src=fallbackIcon(server.name);
+
+    };
+
+  card
+    .querySelector(".ip-box")
+    .onclick =
+      ()=>copyIP(server);
+
+  card
+    .querySelector(".status-button")
+    .onclick =
+      ()=>checkStatus(server,card);
+
+  card
+    .querySelector(".players-button")
+    .onclick =
+      async ()=>{
+
+        const cache =
+          serverCache[serverKey(server)];
+
+        if(!cache?.data){
+
+          await checkStatus(
+            server,
+            card
+          );
+
+        }
+
+        const panel =
+          card.querySelector(".players-panel");
+
+        panel.classList.toggle("show");
+
+      };
+
+  card
+    .querySelector(".detail-button")
+    .onclick =
+      ()=>openDetails(server);
+
+  card
+    .querySelector(".vote")
+    .onclick =
+      ()=>voteServer(server);
+
+  card._check =
+    ()=>checkStatus(server,card);
+
+  return card;
+
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+function matches(cat,server){
+
+  const filter =
+    state[cat].filter;
+
+  const search =
+    state[cat].search
+      .toLowerCase()
+      .trim();
+
+  if(
+    search &&
+    !server.name
+      .toLowerCase()
+      .includes(search) &&
+    !server.ip
+      .toLowerCase()
+      .includes(search)
+  ){
+
+    return false;
+
+  }
+
+  if(cat==="iran"){
+
+    if(
+      filter==="java" &&
+      server.type==="bedrock"
+    ){
+      return false;
+    }
+
+    if(
+      filter==="bedrock" &&
+      server.type==="java"
+    ){
+      return false;
+    }
+
+  }
+
+  if(cat==="foreign"){
+
+    if(
+      filter!=="all" &&
+      server.access!==filter
+    ){
+
+      return false;
+
+    }
+
+  }
+
+  return true;
+
+}
+
+
+/* =========================================================
+   LAND ANIMATION
+========================================================= */
+
+function animateCards(container){
+
+  const cards =
+    container.querySelectorAll(
+      ".server-card,.rank"
+    );
+
+  cards.forEach(
+    (card,index)=>{
+
+      setTimeout(
+        ()=>card.classList.add("landed"),
+        index*35
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   RENDER LIST
+========================================================= */
+
+function renderList(cat){
+
+  const list =
+    document.getElementById(
+      "list-"+cat
+    );
+
+  list.innerHTML="";
+
+  const filtered =
+    SERVERS[cat]
+      .filter(
+        server=>matches(cat,server)
+      );
+
+  if(!filtered.length){
+
+    list.innerHTML =
+      `<div class="empty">
+        🔎 سروری پیدا نشد.<br>
+        عبارت جستجو یا فیلتر را تغییر بده.
+      </div>`;
+
+    return;
+
+  }
+
+  filtered.forEach(
+    server=>{
+      list.appendChild(
+        createCard(cat,server)
+      );
+    }
+  );
+
+  requestAnimationFrame(
+    ()=>animateCards(list)
+  );
+
+}
+
+
+/* =========================================================
+   TOP
+========================================================= */
+
+function renderTop(){
+
+  const list =
+    document.getElementById("list-top");
+
+  list.innerHTML="";
+
+  const all =
+    SERVERS.iran.concat(
+      SERVERS.foreign
+    );
+
+  const sorted =
+    all.slice().sort(
+      (a,b)=>
+        getVotes(b)-getVotes(a)
+    );
+
+  const hasVotes =
+    sorted.some(
+      server=>getVotes(server)>0
+    );
+
+  if(!hasVotes){
+
+    list.innerHTML =
+      `<div class="empty">
+        🏆 هنوز رأیی ثبت نشده.<br>
+        اولین رأی را ثبت کن و سرور مورد علاقه‌ات را بالا ببر!
+      </div>`;
+
+    return;
+
+  }
+
+  sorted
+    .slice(0,15)
+    .forEach(
+      (server,index)=>{
+
+        const row =
+          document.createElement("div");
+
+        row.className="rank";
+
+        row.innerHTML =
+
+          `<div class="rank-position">
+            ${faNumber(index+1)}
+          </div>
+
+          <img
+            class="rank-logo"
+            src="${iconURL(server.ip)}"
+            onerror="this.onerror=null;this.src='${fallbackIcon(server.name)}'"
+          >
+
+          <div class="rank-name">
+            ${escapeHTML(server.name)}
+          </div>
+
+          <div class="rank-votes">
+            🗳️ ${faNumber(getVotes(server))}
+          </div>`;
+
+        list.appendChild(row);
+
+      }
+    );
+
+  requestAnimationFrame(
+    ()=>animateCards(list)
+  );
+
+}
+
+
+/* =========================================================
+   SCOREBOARD
+========================================================= */
+
+function setupScoreServers(){
+
+  const select =
+    document.getElementById("scoreServer");
+
+  select.innerHTML =
+    `<option value="">
+      انتخاب سرور...
+    </option>`;
+
+  const all =
+    SERVERS.iran.concat(
+      SERVERS.foreign
+    );
+
+  all.forEach(
+    (server,index)=>{
+
+      const option =
+        document.createElement("option");
+
+      option.value=String(index);
+
+      option.textContent =
+        server.name+
+        " — "+
+        server.ip;
+
+      select.appendChild(option);
+
+    }
+  );
+
+}
+
+
+function getAllServers(){
+
+  return SERVERS.iran.concat(
+    SERVERS.foreign
+  );
+
+}
+
+
+function updateScoreboardIfSelected(
+  server,
+  data
+){
+
+  const select =
+    document.getElementById("scoreServer");
+
+  const index =
+    getAllServers()
+      .findIndex(
+        s=>s.name===server.name
+      );
+
+  if(
+    select.value===String(index)
+  ){
+
+    renderScoreboard(
+      server,
+      data
+    );
+
+  }
+
+}
+
+
+function renderScoreboard(
+  server,
+  data
+){
+
+  const board =
+    document.getElementById("scoreboard");
+
+  if(!server){
+
+    return;
+
+  }
+
+  const online =
+    data?.online
+      ? "ONLINE"
+      : "OFFLINE";
+
+  const players =
+    data?.players?.online !== undefined
+      ? `${data.players.online}/${data.players.max ?? "?"}`
+      : "?";
+
+  const version =
+    typeof data?.version==="string"
+      ? data.version
+      : data?.version?.name || "?";
+
+  const ip =
+    data?.ip || server.ip;
+
+  const port =
+    data?.port || "25565";
+
+  let motd="---";
+
+  if(data?.motd?.clean){
+
+    motd =
+      Array.isArray(data.motd.clean)
+        ? data.motd.clean.join(" ")
+        : data.motd.clean;
+
+  }
+
+  board.innerHTML =
+
+    `<div class="scoreboard-header">
+      CRAFT RADAR
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">Server</span>
+      <span class="score-value">
+        ${escapeHTML(server.name)}
+      </span>
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">Status</span>
+      <span class="score-value">
+        ${online}
+      </span>
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">Players</span>
+      <span class="score-value">
+        ${escapeHTML(players)}
+      </span>
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">Version</span>
+      <span class="score-value">
+        ${escapeHTML(version)}
+      </span>
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">IP</span>
+      <span class="score-value">
+        ${escapeHTML(ip)}
+      </span>
+    </div>
+
+    <div class="score-line">
+      <span class="score-key">Port</span>
+      <span class="score-value">
+        ${escapeHTML(port)}
+      </span>
+    </div>
+
+    <div class="score-motd">
+      ${escapeHTML(motd)}
+    </div>`;
+
+}
+
+
+document
+  .getElementById("scoreServer")
+  .onchange =
+  async function(){
+
+    const index =
+      Number(this.value);
+
+    if(!this.value){
+
+      return;
+
+    }
+
+    const server =
+      getAllServers()[index];
+
+    if(!server){
+
+      return;
+
+    }
+
+    const cached =
+      serverCache[serverKey(server)];
+
+    if(cached?.data){
+
+      renderScoreboard(
+        server,
+        cached.data
+      );
+
+      return;
+
+    }
+
+    renderScoreboard(
+      server,
+      null
+    );
+
+    const data =
+      await requestServer(server);
+
+    if(data){
+
+      serverCache[serverKey(server)] = {
+        online:true,
+        data:data,
+        server:server
+      };
+
+      renderScoreboard(
+        server,
+        data
+      );
+
+    }else{
+
+      renderScoreboard(
+        server,
+        {
+          online:false
+        }
+      );
+
+    }
+
+  };
+
+
+document
+  .getElementById("copyScore")
+  .onclick =
+  function(){
+
+    const board =
+      document.getElementById(
+        "scoreboard"
+      );
+
+    const lines =
+      Array.from(
+        board.querySelectorAll(".score-line")
+      ).map(
+        row=>{
+
+          const key =
+            row.querySelector(".score-key")
+              ?.textContent
+              .trim();
+
+          const value =
+            row.querySelector(".score-value")
+              ?.textContent
+              .trim();
+
+          return key+
+            " : "+
+            value;
+
+        }
+      );
+
+    const motd =
+      board.querySelector(".score-motd")
+        ?.textContent
+        .trim();
+
+    if(motd){
+
+      lines.push(
+        "MOTD : "+motd
+      );
+
+    }
+
+    copyText(
+      lines.join("\n")
+    );
+
+  };
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+document
+  .querySelectorAll(".tab")
+  .forEach(tab=>{
+
+    tab.onclick=function(){
+
+      const target =
+        this.dataset.tab;
+
+      document
+        .querySelectorAll(".tab")
+        .forEach(
+          t=>t.classList.remove("active")
+        );
+
+      this.classList.add("active");
+
+      document
+        .querySelectorAll(".section")
+        .forEach(
+          section=>
+            section.classList.remove("active")
+        );
+
+      document
+        .getElementById("sec-"+target)
+        .classList.add("active");
+
+      if(target==="top"){
+
+        renderTop();
+
+      }
+
+    };
+
+  });
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+function setupToolbar(cat){
+
+  document
+    .getElementById("search-"+cat)
+    .oninput=function(){
+
+      state[cat].search =
+        this.value;
+
+      renderList(cat);
+
+    };
+
+
+  document
+    .querySelectorAll(
+      "#filter-"+cat+" .chip"
+    )
+    .forEach(chip=>{
+
+      chip.onclick=function(){
+
+        document
+          .querySelectorAll(
+            "#filter-"+cat+" .chip"
+          )
+          .forEach(
+            c=>c.classList.remove("active")
+          );
+
+        this.classList.add("active");
+
+        state[cat].filter =
+          this.dataset.val;
+
+        renderList(cat);
+
+      };
+
+    });
+
+
+  document
+    .getElementById("checkall-"+cat)
+    .onclick =
+    async function(){
+
+      const button=this;
+
+      button.disabled=true;
+
+      button.textContent =
+        "⏳ در حال بررسی...";
+
+      resetOnlineStat();
+
+      const cards =
+        Array.from(
+          document
+            .getElementById("list-"+cat)
+            .querySelectorAll(".server-card")
+        );
+
+      let index=0;
+
+      async function worker(){
+
+        while(index<cards.length){
+
+          const current =
+            cards[index++];
+
+          try{
+
+            await current._check();
+
+          }catch(e){}
+
+        }
+
+      }
+
+      const workers=[];
+
+      for(
+        let i=0;
+        i<Math.min(3,cards.length);
+        i++
+      ){
+
+        workers.push(
+          worker()
+        );
+
+      }
+
+      await Promise.all(
+        workers
+      );
+
+      button.disabled=false;
+
+      button.textContent =
+        "📡 بررسی همه";
+
+    };
+
+}
+
+
+document
+  .getElementById("refreshIran")
+  .onclick =
+  ()=>renderList("iran");
+
+
+document
+  .getElementById("refreshForeign")
+  .onclick =
+  ()=>renderList("foreign");
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function paintStats(){
+
+  document
+    .getElementById("stat-total")
+    .textContent =
+      faNumber(
+        SERVERS.iran.length+
+        SERVERS.foreign.length
+      );
+
+  document
+    .getElementById("stat-iran")
+    .textContent =
+      faNumber(
+        SERVERS.iran.length
+      );
+
+  document
+    .getElementById("stat-foreign")
+    .textContent =
+      faNumber(
+        SERVERS.foreign.length
+      );
+
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+loadStorage();
+
+paintStats();
+
+updateUserArea();
+
+setupToolbar("iran");
+
+setupToolbar("foreign");
+
+setupScoreServers();
+
+renderList("iran");
+
+renderList("foreign");
+
+renderTop();
+
+})();
+</script>
+
+</body>
+</html>
+```
